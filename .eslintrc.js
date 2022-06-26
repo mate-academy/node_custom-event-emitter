@@ -7,7 +7,4 @@ module.exports = {
     'no-proto': 0
   },
   plugins: ['jest'],
-  parserOptions: {
-    "sourceType": "module",
-}
 };

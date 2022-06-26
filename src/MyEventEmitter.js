@@ -1,5 +1,6 @@
+'use strict';
 
-export class MyEventEmitter {
+class MyEventEmitter {
   constructor() {
     this.event = {};
   }
@@ -92,3 +93,5 @@ export class MyEventEmitter {
     return fns.lenght;
   }
 }
+
+module.exports.MyEventEmitter = MyEventEmitter;
