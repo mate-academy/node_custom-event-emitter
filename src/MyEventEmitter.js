@@ -35,11 +35,12 @@ export class MyEventEmitter {
     this.events.set(event, eventList)
     return this
   }
-  emit(event) {
+  emit(event, ...args) {
     if (this.events.get(event)) {
-      this.events.get(event).forEach((c) => c())
+      this.events.get(event).forEach((c) => c(...args))
+      return true;
     }
-    return this
+    return false;
   }
   prependListener(event, callback) {
     if (this.events.get(event)) {
@@ -72,8 +73,8 @@ export class MyEventEmitter {
   }
   listenerCount(event) {
     if (this.events.get(event)) {
-      return this.events.get(event)
+      return this.events.get(event).length()
     }
-    return "No listeners to show"
+    return 0;
   }
 }
