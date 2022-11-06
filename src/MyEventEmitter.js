@@ -11,6 +11,8 @@ class MyEventEmitter {
     } else {
       this.events[eventName].push(callback);
     }
+
+    return this;
   }
 
   once(eventName, callback) {
@@ -22,6 +24,8 @@ class MyEventEmitter {
     };
 
     this.listeners[eventName].push(onceWrapper);
+
+    return this;
   }
 
   off(eventName, callback) {
@@ -30,20 +34,23 @@ class MyEventEmitter {
     for (let i = 0; i < this.events[eventName].length; i++) {
       if (this.events[eventName] === callback) {
         this.events[eventName].splice(i, 1);
-
-        return;
+        break;
       }
     }
+
+    return this;
   }
 
   emit(eventName, ...args) {
     if (!this.events[eventName]) {
-      return;
+      return false;
     }
 
     this.events[eventName].forEach(callback => {
       callback(...args);
     });
+
+    return true;
   }
 
   prependListener(eventName, callback) {
@@ -52,6 +59,8 @@ class MyEventEmitter {
     } else {
       this.events[eventName].unshift(callback);
     }
+
+    return this;
   }
 
   prependOnceListener(eventName, callback) {
@@ -62,11 +71,15 @@ class MyEventEmitter {
       this.off(eventName, onceWrapper);
     };
 
-    this.listeners[eventName].unshift(onceWrapper);
+    this.prependListener(eventName, onceWrapper);
+
+    return this;
   }
 
   removeAllListeners(eventName) {
     this.events[eventName] = [];
+
+    return this;
   }
 
   listenerCount(eventName) {
@@ -84,10 +97,14 @@ class MyEventEmitter {
 
   addListener(eventName, callback) {
     this.on(eventName, callback);
+
+    return this;
   }
 
   removeListener(eventName, callback) {
     this.off(eventName, callback);
+
+    return this;
   }
 }
 
