@@ -1,6 +1,6 @@
 'use strict';
 
-export class MyEventEmitter {
+module.export = class MyEventEmitter {
   constructor() {
     this.listeners = {};
   }
@@ -27,7 +27,8 @@ export class MyEventEmitter {
       return;
     }
 
-    this.listeners[event] = this.listeners[event].filter((cb) => cb !== callback);
+    this.listeners[event] = this.listeners[event].filter((cb) => (
+      cb !== callback));
   }
 
   emit(event, ...args) {
