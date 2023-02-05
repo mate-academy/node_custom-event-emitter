@@ -2,57 +2,62 @@
 
 class MyEventEmitter {
   constructor() {
-    this.events = {};
+    this.listeners = {};
   }
 
   on(eventName, listener) {
     this.validateEventName(eventName);
     this.validateHandler(listener);
 
-    this.events[eventName].push(listener);
+    this.listeners[eventName].push(listener);
 
     return this;
   }
+
   once(eventName, listener) {
     this.validateEventName(eventName);
     this.validateHandler(listener);
 
-    this.events[eventName] = this.events[eventName] || [];
+    this.listeners[eventName] = this.listeners[eventName] || [];
 
-    const onceWrapper = () => {
-      listener();
+    const onceWrapper = (...args) => {
+      listener(args);
       this.off(eventName, onceWrapper);
     };
 
-    this.events[eventName].push(onceWrapper);
+    this.listeners[eventName].push(onceWrapper);
 
     return this;
   }
+
   off(eventName, listener) {
     this.validateEventName(eventName);
     this.validateHandler(listener);
 
     return this.removeListener(eventName, listener);
   }
+
   emit(eventName, ...args) {
     this.validateEventName(eventName);
 
-    if (!this.events[eventName]) {
+    if (!this.listeners[eventName]) {
       return false;
     }
 
-    this.events[eventName].forEach((f) => f(...args));
+    this.listeners[eventName].forEach((listener) => listener(...args));
 
     return true;
   }
+
   prependListener(eventName, listener) {
     this.validateEventName(eventName);
     this.validateHandler(listener);
 
-    this.events[eventName].unshift(eventName);
+    this.listeners[eventName].unshift(eventName);
 
     return this;
   }
+
   prependOnceListener(eventName, listener) {
     this.validateEventName(eventName);
     this.validateHandler(listener);
@@ -62,28 +67,23 @@ class MyEventEmitter {
       this.off(eventName, onceWrapper);
     };
 
-    this.events[eventName].unshift(onceWrapper);
+    this.listeners[eventName].unshift(onceWrapper);
 
     return this;
   }
-  removeAllListeners(eventName) {
-    this.validateEventName(eventName);
 
+  removeAllListeners(eventName) {
     if (!eventName) {
       this.events = {};
     }
 
     return this;
   }
+
   listenerCount(eventName) {
     this.validateEventName(eventName);
 
-    let listnersCount = 0;
-    const listeners = this.events[eventName] || [];
-
-    listnersCount = listeners.length;
-
-    return listnersCount;
+    return this.listeners[eventName].length || 0;
   }
 
   validateEventName(event) {
