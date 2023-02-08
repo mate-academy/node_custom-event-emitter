@@ -110,7 +110,7 @@ class MyEventEmitter {
 
     const { events } = this;
 
-    return events[eventName].length;
+    return events[eventName].length || 0;
   }
 }
 module.exports.MyEventEmitter = MyEventEmitter;
