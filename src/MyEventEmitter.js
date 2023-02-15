@@ -51,7 +51,7 @@ class MyEventEmitter {
   }
 
   emit(eventName, ...args) {
-    checkForErrors(eventName, () => {});
+    checkForErrors(eventName);
 
     const { events } = this;
 
