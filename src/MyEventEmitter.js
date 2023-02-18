@@ -6,8 +6,8 @@ export class MyEventEmitter {
   }
 
   checkArgs(name, listener) {
-    const isNameString = z.string().check(name);
-    const isListenerFunction = z.function().check(listener);
+    const isNameString = z.string().safeParse(name).success;
+    const isListenerFunction = z.function().safeParse(listener).success;
 
     if (!isNameString || !isListenerFunction) {
       throw new Error('Invalid arguments');
@@ -52,7 +52,7 @@ export class MyEventEmitter {
   }
 
   emit(name, ...args) {
-    const isNameString = z.string().check(name);
+    const isNameString = z.string().safeParse(name).success;
 
     if (!isNameString) {
       throw new Error('Invalid name argument');
@@ -85,7 +85,7 @@ export class MyEventEmitter {
   }
 
   removeAllListeners([names]) {
-    const isNamesArray = z.array(z.string()).check(names);
+    const isNamesArray = z.array(z.string()).safeParse(names).success;
 
     if (!isNamesArray) {
       throw new Error('Invalid names argument');
@@ -99,7 +99,7 @@ export class MyEventEmitter {
   }
 
   listenerCount(name) {
-    const isNameString = z.string().check(name);
+    const isNameString = z.string().safeParse(name).success;
 
     if (!isNameString) {
       throw new Error('Invalid name argument');
