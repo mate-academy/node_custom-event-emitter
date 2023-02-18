@@ -1,17 +1,38 @@
+import z from 'zod';
+
 export class MyEventEmitter {
   constructor() {
-    this._events = {};
+    this.events = {};
+  }
+
+  checkArgs(name, listener) {
+    const isNameString = z.string().check(name);
+    const isListenerFunction = z.function().check(listener);
+
+    if (!isNameString || !isListenerFunction) {
+      throw new Error('Invalid arguments');
+    }
+  }
+
+  checkEvents(name) {
+    const isEventsContains = Object.keys(this.events).includes(name);
+
+    return isEventsContains;
   }
 
   on(name, listener) {
-    if (!this._events[name]) {
-      this._events[name] = [];
+    this.checkArgs(name, listener);
+
+    if (!this.checkEvents(name)) {
+      this.events[name] = [];
     }
 
-    this._events[name].push(listener);
+    this.events[name].push(listener);
   }
 
   once(name, listener) {
+    this.checkArgs(name, listener);
+
     const onceListener = (...args) => {
       listener(...args);
       this.off(name, onceListener);
@@ -21,26 +42,40 @@ export class MyEventEmitter {
   }
 
   off(name, listener) {
-    if (this._events[name]) {
-      this._events[name] = this._events[name].filter((fn) => fn !== listener);
+    this.checkArgs(name, listener);
+
+    if (!this.checkEvents(name)) {
+      return;
     }
+
+    this.events[name] = this.events[name].filter((fn) => fn !== listener);
   }
 
   emit(name, ...args) {
-    if (this._events[name]) {
-      this._events[name].forEach((fn) => fn(...args));
+    const isNameString = z.string().check(name);
+
+    if (!isNameString) {
+      throw new Error('Invalid name argument');
+    }
+
+    if (this.checkEvents(name)) {
+      this.events[name].forEach((fn) => fn(...args));
     }
   }
 
   prependListener(name, listener) {
-    if (!this._events[name]) {
-      this._events[name] = [];
+    this.checkArgs(name, listener);
+
+    if (!this.checkEvents(name)) {
+      this.events[name] = [];
     }
 
-    this._events[name].unshift(listener);
+    this.events[name].unshift(listener);
   }
 
   prependOnceListener(name, listener) {
+    this.checkArgs(name, listener);
+
     const onceListener = (...args) => {
       listener(...args);
       this.off(name, onceListener);
@@ -50,15 +85,26 @@ export class MyEventEmitter {
   }
 
   removeAllListeners([names]) {
+    const isNamesArray = z.array(z.string()).check(names);
+
+    if (!isNamesArray) {
+      throw new Error('Invalid names argument');
+    }
+
     if (names) {
-      names.forEach((name) => delete this._events[name]);
+      names.forEach((name) => delete this.events[name]);
     } else {
-      this._events = {};
+      this.events = {};
     }
   }
 
   listenerCount(name) {
-    return this._events[name] ? this._events[name].length : 0;
+    const isNameString = z.string().check(name);
+
+    if (!isNameString) {
+      throw new Error('Invalid name argument');
+    }
+
+    return this.events[name] ? this.events[name].length : 0;
   }
 }
-
