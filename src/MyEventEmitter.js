@@ -26,7 +26,7 @@ class MyEventEmitter {
     isValidCallback(callback);
 
     const oneTimeCallback = (...args) => {
-      callback(args);
+      callback(...args);
       this.off(eventName, callback);
     };
 
@@ -58,7 +58,7 @@ class MyEventEmitter {
     }
 
     this.events[eventName].forEach((cb) => {
-      cb(args);
+      cb(...args);
     });
 
     return true;
