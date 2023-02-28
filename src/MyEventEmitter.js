@@ -64,41 +64,41 @@ export class MyEventEmitter {
   }) {
     const newListener = new Listener(eventName, callback, once);
 
-    const eventListeners = this.listenersMap.get(eventName);
-
-    if (eventListeners) {
-      if (prepend) {
-        eventListeners.unshift(newListener);
-      } else {
-        eventListeners.push(newListener);
-      }
+    let eventListeners = this.listenersMap.get(eventName);
+    
+    if (!eventListeners) {
+      eventListeners = [];
+      this.listenersMap.set(eventName, eventListeners);
+    }
+    if (prepend) {
+      eventListeners.unshift(newListener);
     } else {
-      this.listenersMap.set(eventName, [newListener]);
+      eventListeners.push(newListener);
     }
   }
 
   emit(eventName, ...args) {
     const eventListeners = this.listenersMap.get(eventName);
 
-    if (eventListeners) {
-      const listenersToDelete = [];
-
-      eventListeners.forEach((listener) => {
-        const { once, callback } = listener;
-
-        if (once) {
-          listenersToDelete.push(listener);
-        }
-
-        callback(...args);
-      });
-
-      this.cleanupEventListeners({ eventName, listenersToDelete });
-
-      return true;
+    if (!eventListeners) {
+      return false;
     }
+    
+    const listenersToDelete = [];
 
-    return false;
+    eventListeners.forEach((listener) => {
+      const { once, callback } = listener;
+
+      if (once) {
+        listenersToDelete.push(listener);
+      }
+
+      callback(...args);
+    });
+
+    this.cleanupEventListeners({ eventName, listenersToDelete });
+
+    return true;
   }
 
   cleanupEventListeners({
@@ -107,15 +107,17 @@ export class MyEventEmitter {
   }) {
     const eventListeners = this.listenersMap.get(eventName);
 
-    if (eventListeners) {
-      const listenersToKeep = eventListeners
-        .filter(listener => !listenersToDelete.includes(listener));
+    if (!eventListeners) {
+      return;
+    }
 
-      if (listenersToKeep.length) {
-        this.listenersMap.set(eventName, listenersToKeep);
-      } else {
-        this.listenersMap.delete(eventName);
-      }
+    const listenersToKeep = eventListeners
+      .filter(listener => !listenersToDelete.includes(listener));
+
+    if (listenersToKeep.length) {
+      this.listenersMap.set(eventName, listenersToKeep);
+    } else {
+      this.listenersMap.delete(eventName);
     }
   }
 
@@ -128,7 +130,7 @@ export class MyEventEmitter {
         .find((listener) => callback === listener.callback);
 
       if (listenerToDelete) {
-        setTimeout(this.cleanupEventListeners, 0, {
+        this.cleanupEventListeners({
           eventName,
           listenersToDelete: [listenerToDelete],
         });
