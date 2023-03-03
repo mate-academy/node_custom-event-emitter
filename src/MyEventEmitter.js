@@ -27,16 +27,16 @@ class MyEventEmitter {
 
     return this;
   }
-  emit(eventName) {
+  emit(eventName, ...args) {
     const listeners = this.events[eventName];
 
     if (!listeners) {
-      return this;
+      return false;
     }
 
-    this.events[eventName].forEach(listener => listener());
+    this.events[eventName].forEach(listener => listener(...args));
 
-    return this;
+    return true;
   }
   prependListener(eventName, listener) {
     this.events[eventName] = this.events[eventName] || [];
