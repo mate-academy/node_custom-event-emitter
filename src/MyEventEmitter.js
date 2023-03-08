@@ -11,7 +11,7 @@ class MyEventEmitter {
     if (Object.prototype.hasOwnProperty.call(events, eventName)) {
       events[eventName].push(listener);
     } else {
-      events[eventName] = [];
+      events[eventName] = [listener];
     }
 
     return this;
@@ -23,9 +23,7 @@ class MyEventEmitter {
       this.removeListener(eventName, newListener);
     };
 
-    this.on(eventName, newListener);
-
-    return this;
+    return this.on(eventName, newListener);
   }
 
   off(eventName, listener) {
@@ -57,7 +55,7 @@ class MyEventEmitter {
     if (Object.prototype.hasOwnProperty.call(events, eventName)) {
       events[eventName].unshift(listener);
     } else {
-      events[eventName] = [];
+      events[eventName] = [listener];
     }
 
     return this;
@@ -71,18 +69,11 @@ class MyEventEmitter {
         hasAlredyCalled = true;
         listener(...args);
       } else {
-        this.removeListener(eventName, newListener);
+        this.off(eventName, newListener);
       }
     };
 
     return this.prependListener(eventName, newListener);
-  }
-
-  removeListener(eventName, listener) {
-    const { events } = this;
-
-    events[eventName] = events[eventName]
-      .filter(currentListener => currentListener !== listener);
   }
 
   removeAllListeners(eventName) {
