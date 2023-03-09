@@ -6,79 +6,89 @@ class MyEventEmitter {
   }
 
   on(eventName, listener) {
-    if (typeof listener !== 'function') {
-      throw new Error('Listener must be a function!');
-    }
+    const { events } = this;
 
-    this.events[eventName] = this.events[eventName] || [];
-    this.events[eventName].push(listener);
+    events[eventName] = this.events[eventName] || [];
+    events[eventName].push(listener);
 
     return this;
   }
 
   once(eventName, listener) {
+    const { events } = this;
+
     const wrapper = () => {
       listener();
       this.off(eventName, wrapper);
     };
 
-    this.events[eventName].push(wrapper);
+    events[eventName].push(wrapper);
 
     return this;
   }
 
   off(eventName, listenerToRemove) {
-    if (!this.events[eventName]) {
-      throw new Error(`Error removing listener! ${eventName} does not exists!`);
-    }
+    const { events } = this;
 
     const filterListeners = (listener) => listener !== listenerToRemove;
 
-    this.events[eventName] = this.events[eventName].filter(filterListeners);
+    events[eventName] = events[eventName].filter(filterListeners);
 
     return this;
   }
 
   emit(eventName, ...args) {
-    const fns = this.events[eventName];
+    const { events } = this;
 
-    if (!fns) {
+    const listeners = events[eventName];
+
+    if (!listeners) {
       return false;
     }
 
-    fns.forEach(f => f(...args));
+    listeners.forEach(f => f(...args));
 
     return true;
   }
 
   prependListener(eventName, listener) {
-    this.events[eventName] = this.events[eventName] || [];
-    this.events[eventName].unshift(listener);
+    const { events } = this;
+
+    events[eventName] = events[eventName] || [];
+    events[eventName].unshift(listener);
 
     return this;
   }
 
   prependOnceListener(eventName, listener) {
-    const wrapper = () => {
-      listener();
-      this.off(eventName, wrapper);
-    };
+    let hasAlreadyCalled = false;
 
-    this.events[eventName].push(wrapper);
+    const wrapper = (...args) => {
+      if (!hasAlreadyCalled) {
+        hasAlreadyCalled = true;
+        listener(...args);
+      } else {
+        this.off(eventName, wrapper);
+      }
+    };
 
     return this.prependListener(eventName, wrapper);
   }
 
   removeAllListeners(eventName) {
+    const { events } = this;
+
     if (eventName) {
-      delete this.events[eventName];
+      delete events[eventName];
     } else {
       this.events = {};
     }
   }
 
   listenerCount(eventName) {
-    return this.events[eventName].length || 0;
+    const { events } = this;
+
+    return events[eventName].length || 0;
   }
 }
 
