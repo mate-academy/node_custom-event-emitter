@@ -25,14 +25,25 @@ class MyEventEmitter {
     }
   }
 
-  on(eventName, listener) {
-    this._validateEventName(eventName);
-    this._validateListener(listener);
-
+  _checkPropertyExist(eventName) {
     if (!this._listeners.hasOwnProperty(eventName)) {
       this._listeners[eventName] = [];
     }
+  }
 
+  _useCallback(eventName, listener) {
+    const callback = (...args) => {
+      listener(args);
+      this.off(eventName, callback);
+    };
+
+    return callback;
+  }
+
+  on(eventName, listener) {
+    this._validateEventName(eventName);
+    this._validateListener(listener);
+    this._checkPropertyExist(eventName);
     this._listeners[eventName].push(listener);
 
     return this;
@@ -42,10 +53,7 @@ class MyEventEmitter {
     this._validateEventName(eventName);
     this._validateListener(listener);
 
-    const onceCallback = (...args) => {
-      listener(args);
-      this.off(eventName, onceCallback);
-    };
+    const onceCallback = this._useCallback(eventName, listener);
 
     this.on(eventName, onceCallback);
   }
@@ -75,11 +83,7 @@ class MyEventEmitter {
   prependListener(eventName, listener) {
     this._validateEventName(eventName);
     this._validateListener(listener);
-
-    if (!this._listeners.hasOwnProperty(eventName)) {
-      this._listeners[eventName] = [];
-    }
-
+    this._checkPropertyExist(eventName);
     this._listeners[eventName].unshift(listener);
 
     return this;
@@ -89,10 +93,7 @@ class MyEventEmitter {
     this._validateEventName(eventName);
     this._validateListener(listener);
 
-    const onceCallback = (...args) => {
-      listener(args);
-      this.off(eventName, onceCallback);
-    };
+    const onceCallback = this._useCallback(eventName, listener);
 
     this.prependListener(eventName, onceCallback);
   }
