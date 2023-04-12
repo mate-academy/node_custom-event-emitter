@@ -11,8 +11,15 @@ class MyEventEmitter {
     }
   }
 
+  checkEventNameType(eventName) {
+    if (typeof eventName !== 'string') {
+      throw new Error('Event name must be a string');
+    }
+  }
+
   on(eventName, listener) {
     this.checkListenerType(listener);
+    this.checkEventNameType(eventName);
 
     if (!this.events[eventName]) {
       this.events[eventName] = [];
@@ -23,6 +30,7 @@ class MyEventEmitter {
 
   once(eventName, listener) {
     this.checkListenerType(listener);
+    this.checkEventNameType(eventName);
 
     const onceWrapper = (...args) => {
       listener(...args);
@@ -34,13 +42,24 @@ class MyEventEmitter {
   }
 
   off(eventName, listenerForRemove) {
-    if (this.events[eventName]) {
-      this.events[eventName] = this.events[eventName]
-        .filter(listener => listener !== listenerForRemove);
+    this.checkListenerType(listenerForRemove);
+    this.checkEventNameType(eventName);
+
+    if (!this.events[eventName]) {
+      throw new Error('This event name does not exist');
     }
+
+    if (!(this.events[eventName].includes(listenerForRemove))) {
+      throw new Error('This listener does not exist');
+    }
+
+    this.events[eventName] = this.events[eventName]
+      .filter(listener => listener !== listenerForRemove);
   }
 
   emit(eventName, data) {
+    this.checkEventNameType(eventName);
+
     if (this.events[eventName]) {
       this.events[eventName].forEach(listener => listener(data));
     }
@@ -48,6 +67,7 @@ class MyEventEmitter {
 
   prependListener(eventName, listener) {
     this.checkListenerType(listener);
+    this.checkEventNameType(eventName);
 
     if (!this.events[eventName]) {
       this.events[eventName] = [];
@@ -58,6 +78,7 @@ class MyEventEmitter {
 
   prependOnceListener(eventName, listener) {
     this.checkListenerType(listener);
+    this.checkEventNameType(eventName);
 
     const onceWrapper = (...args) => {
       listener(...args);
@@ -69,10 +90,14 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
+    this.checkEventNameType(eventName);
+
     delete this.events[eventName];
   }
 
   listenerCount(eventName) {
+    this.checkEventNameType(eventName);
+
     return this.events[eventName].length || 0;
   }
 }
