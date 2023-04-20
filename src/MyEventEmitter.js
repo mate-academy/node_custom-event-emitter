@@ -34,13 +34,13 @@ const myEventListener = class MyEventEmitter {
   }
 
   emit(eventName, [...args]) {
-    for (let i = 0; i < this.events[eventName].length; i++) {
-      if (this.events[eventName][i].length <= args.length) {
-        return true;
-      }
-
+    if (!this.events[eventName]) {
       return false;
     }
+
+    this.events[eventName].forEach((listener) => listener(...args));
+
+    return true;
   }
 
   prependListener(eventName, listener) {
