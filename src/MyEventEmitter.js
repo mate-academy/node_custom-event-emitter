@@ -1,6 +1,6 @@
 'use strict';
 
-export class MyEventEmitter {
+class MyEventEmitter {
   on() {}
   once() {}
   off() {}
@@ -10,3 +10,7 @@ export class MyEventEmitter {
   removeAllListeners() {}
   listenerCount() {}
 }
+
+module.exports = {
+  EventEmitter: MyEventEmitter,
+};
