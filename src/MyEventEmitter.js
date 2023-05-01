@@ -14,8 +14,8 @@ class MyEventEmitter {
 
   once(eventName, listener) {
     const wrapper = (...args) => {
-      listener(args);
-      this.off(eventName, listener);
+      listener(...args);
+      this.off(eventName, wrapper);
     };
 
     this.on(eventName, wrapper);
@@ -52,8 +52,8 @@ class MyEventEmitter {
 
   prependOnceListener(eventName, listener) {
     const wrapper = (...args) => {
-      listener(args);
-      this.off(eventName, listener);
+      listener(...args);
+      this.off(eventName, wrapper);
     };
 
     this.prependListener(eventName, wrapper);
@@ -67,11 +67,9 @@ class MyEventEmitter {
 
   listenerCount(eventName) {
     if (this.events.has(eventName)) {
-      // eslint-disable-next-line no-console
-      console.log(this.events.get(eventName).length);
+     return this.events.get(eventName).length;
     } else {
-      // eslint-disable-next-line no-console
-      console.log(0);
+     return 0;
     }
   }
 }
