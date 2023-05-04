@@ -30,7 +30,7 @@ myEmitter.emit('not todo');
 myEmitter.emit('todo', 2);
 
 myConsole.log(myEmitter.listenerCount('todo'));
-myConsole.log(myEmitter.listenerCount('todo', callback));
+myConsole.log(myEmitter.listenerCount('todo'));
 myConsole.log(myEmitter.listenerCount('not todo'));
 
 myEmitter.removeAllListeners();

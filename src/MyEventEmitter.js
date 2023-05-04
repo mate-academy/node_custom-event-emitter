@@ -2,31 +2,31 @@
 
 class MyEventEmitter {
   constructor() {
-    this.events = {
-
-    };
+    this.events = {};
   }
 
   addEvent(name, callback, repeat, prepend) {
-    if ({}.hasOwnProperty.call(this.events, name)) {
-      if (prepend) {
-        this.events[name].unshift({
-          repeat,
-          callback,
-        });
-      } else {
-        this.events[name].push({
-          repeat,
-          callback,
-        });
-      }
-    } else {
+    if (!Object.hasOwnProperty.call(this.events, name)) {
       this.events[name] = [
         {
           repeat,
           callback,
         },
       ];
+
+      return;
+    }
+
+    if (prepend) {
+      this.events[name].unshift({
+        repeat,
+        callback,
+      });
+    } else {
+      this.events[name].push({
+        repeat,
+        callback,
+      });
     }
   }
 
@@ -47,44 +47,43 @@ class MyEventEmitter {
   }
 
   off(name, listener) {
-    if ({}.hasOwnProperty.call(this.events, name)) {
-      const callbackIndex = this.events[name].findIndex(
-        ({ callback }) => callback === listener
-      );
+    if (!Object.hasOwnProperty.call(this.events, name)) {
+      return;
+    }
 
-      if (callbackIndex !== -1) {
-        if (this.events[name].length === 1) {
-          delete this.events[name];
-        } else {
-          this.events[name].splice(callbackIndex, 1);
-        }
+    const callbackIndex = this.events[name].findIndex(
+      ({ callback }) => callback === listener
+    );
+
+    if (callbackIndex !== -1) {
+      if (this.events[name].length === 1) {
+        delete this.events[name];
+      } else {
+        this.events[name].splice(callbackIndex, 1);
       }
     }
   }
 
   emit(name, ...args) {
-    if ({}.hasOwnProperty.call(this.events, name)) {
-      const callbacks = this.events[name];
-
-      callbacks.forEach(({ callback }) => {
-        callback(args);
-      });
-      this.events[name] = callbacks.filter(({ repeat }) => repeat);
+    if (!Object.hasOwnProperty.call(this.events, name)) {
+      return;
     }
+
+    const callbacks = this.events[name];
+
+    callbacks.forEach(({ callback }) => {
+      callback(args);
+    });
+    this.events[name] = callbacks.filter(({ repeat }) => repeat);
   }
 
-  removeAllListeners() {
-    this.events = [];
+  removeAllListeners(name) {
+    delete this.events[name];
   }
-  listenerCount(name, listener) {
-    if ({}.hasOwnProperty.call(this.events, name)) {
-      if (listener) {
-        return this.events[name].filter(
-          ({ callback }) => callback === listener
-        ).length;
-      } else {
-        return this.events[name].length;
-      }
+
+  listenerCount(name) {
+    if (Object.hasOwnProperty.call(this.events, name)) {
+      return this.events[name].length;
     }
 
     return 0;
