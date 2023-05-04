@@ -28,16 +28,12 @@ class MyEventEmitter {
 
   off(eventName, listener) {
     if (this.events[eventName]) {
-      const stringifiedListener = JSON.stringify(listener);
       const listeners = this.events[eventName];
 
-      for (let i = 0; i < listeners.length; i++) {
-        if (JSON.stringify(listeners[i]) === stringifiedListener) {
-          listeners.splice(i, 1);
-          break;
-        }
+      while (listeners.indexOf(listener) >= 0) {
+        listeners.splice(listeners.indexOf(listener), 1);
       }
-    }
+    };
 
     return this;
   }
