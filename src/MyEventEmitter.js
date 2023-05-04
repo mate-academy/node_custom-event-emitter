@@ -94,15 +94,9 @@ class MyEventEmitter {
 
     const stringifiedListener = JSON.stringify(listener);
 
-    return this.events[eventName].reduce((acc, el) => {
-      let tempAcc = acc;
-
-      if (JSON.stringify(el) === stringifiedListener) {
-        tempAcc += 1;
-      }
-
-      return tempAcc;
-    }, 0) || 0;
+    return this.events[eventName].filter(
+      tempListener => JSON.stringify(tempListener) === stringifiedListener,
+    ).length;
   }
 }
 
