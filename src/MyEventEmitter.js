@@ -33,6 +33,7 @@ class MyEventEmitter {
   };
 
   once(eventName, listener) {
+    const { validateInput } = this;
     const { isNameValid, isListenerValid } = validateInput(eventName, listener);
 
     if (!isNameValid && !isListenerValid) {
@@ -90,7 +91,10 @@ class MyEventEmitter {
 
   prependListener(eventName, listener) {
     const { events, validateInput } = this;
-    const { isListenerValid, isNameValid } = validateInput(eventName, listener).bothArgsAreValid;
+    const {
+      isListenerValid,
+      isNameValid,
+    } = validateInput(eventName, listener).bothArgsAreValid;
 
     if (!isNameValid && !isListenerValid) {
       console.log(
@@ -108,7 +112,10 @@ class MyEventEmitter {
   };
 
   prependOnceListener(eventName, listener) {
-    const { isNameValid, isListenerValid } = this.validateInput(eventName, listener);
+    const {
+      isNameValid,
+      isListenerValid,
+    } = this.validateInput(eventName, listener);
 
     if (!isNameValid && !isListenerValid) {
       console.log(
@@ -157,9 +164,10 @@ class MyEventEmitter {
     const { events, validateInput } = this;
     const { isNameValid, isListenerValid } = validateInput(eventName, listener);
 
-
     if (!isNameValid && !isListenerValid && listener) {
-      console.log('Invalid argument. (eventName => string, listener => function)');
+      console.log(
+        'Invalid argument. (eventName => string, listener => function)'
+      );
 
       return;
     };
