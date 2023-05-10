@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 'use strict';
 
-export class MyEventEmitter {
+class MyEventEmitter {
   constructor() {
     this.events = {};
   };
@@ -187,3 +188,5 @@ export class MyEventEmitter {
     }
   };
 }
+
+module.exports = { MyEventEmitter };
