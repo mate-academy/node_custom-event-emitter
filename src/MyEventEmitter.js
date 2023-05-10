@@ -155,7 +155,7 @@ class MyEventEmitter {
       console.log(`Listeners removed from '${eventName}'`);
     };
 
-    events[eventName].length
+    return events[eventName].length
       ? removeExistingListeners()
       : console.log('Event exist, but there is no listeners');
   };
