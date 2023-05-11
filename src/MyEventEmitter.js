@@ -17,7 +17,7 @@ class MyEventEmitter {
     const { events, validateInput } = this;
     const { isNameValid, isListenerValid } = validateInput(eventName, listener);
 
-    if (!isNameValid && !isListenerValid) {
+    if (!isNameValid || !isListenerValid) {
       console.log(
         'Invalid arguments. (eventName => string, listener => function)',
       );
@@ -36,7 +36,7 @@ class MyEventEmitter {
     const { validateInput } = this;
     const { isNameValid, isListenerValid } = validateInput(eventName, listener);
 
-    if (!isNameValid && !isListenerValid) {
+    if (!isNameValid || !isListenerValid) {
       console.log(
         'Invalid arguments. (eventName => string, listener => function)'
       );
@@ -56,7 +56,7 @@ class MyEventEmitter {
     const { events, validateInput } = this;
     const { isNameValid, isListenerValid } = validateInput(eventName, listener);
 
-    if (!isNameValid && !isListenerValid) {
+    if (!isNameValid || !isListenerValid) {
       console.log(
         'Invalid arguments. (eventName => string, listener => function)'
       );
@@ -94,9 +94,9 @@ class MyEventEmitter {
     const {
       isListenerValid,
       isNameValid,
-    } = validateInput(eventName, listener).bothArgsAreValid;
+    } = validateInput(eventName, listener);
 
-    if (!isNameValid && !isListenerValid) {
+    if (!isNameValid || !isListenerValid) {
       console.log(
         'Invalid arguments. (eventName => string, listener => function)',
       );
@@ -117,7 +117,7 @@ class MyEventEmitter {
       isListenerValid,
     } = this.validateInput(eventName, listener);
 
-    if (!isNameValid && !isListenerValid) {
+    if (!isNameValid || !isListenerValid) {
       console.log(
         'Invalid arguments. (eventName => string, listener => function)'
       );
@@ -164,7 +164,7 @@ class MyEventEmitter {
     const { events, validateInput } = this;
     const { isNameValid, isListenerValid } = validateInput(eventName, listener);
 
-    if (!isNameValid && !isListenerValid && listener) {
+    if (!isNameValid || (!isListenerValid && listener)) {
       console.log(
         'Invalid argument. (eventName => string, listener => function)'
       );
