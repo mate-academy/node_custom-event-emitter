@@ -11,6 +11,8 @@ class MyEventEmitter {
     }
 
     this.events[eventName].push(listener);
+
+    return this;
   }
 
   once(eventName, listener) {
@@ -51,6 +53,8 @@ class MyEventEmitter {
     }
 
     this.events[eventName].unshift(listener);
+
+    return this;
   }
 
   prependOnceListener(eventName, listener) {
@@ -64,6 +68,8 @@ class MyEventEmitter {
     };
 
     this.prependListener(eventName, callback);
+
+    return this;
   }
 
   removeAllListeners(eventName) {
@@ -72,6 +78,8 @@ class MyEventEmitter {
     } else {
       this.events = {};
     }
+
+    return this;
   }
 
   listenerCount(eventName) {
