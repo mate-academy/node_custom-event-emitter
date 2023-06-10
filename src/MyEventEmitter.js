@@ -37,6 +37,8 @@ class MyEventEmitter {
 
     this.events[eventName] = this.events[eventName]
       .filter(listener => listener !== listenerToRemove);
+
+    return this;
   }
 
   emit(eventName, ...args) {
