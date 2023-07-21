@@ -1,33 +1,65 @@
 'use strict';
 
-const http = require('http');
-
 class MyEventEmitter {
+  constructor() {
+    this.events = {};
+    this.onceListenerBuff = [];
+  }
+
   on(eventName, callback) {
-    http.Server.prototype.on.call(this, eventName, callback);
+    if (this.events[eventName]) {
+      this.events[eventName].push(callback);
+    } else {
+      this.events[eventName] = [callback];
+    }
   }
   once(eventName, callback) {
-    http.Server.prototype.once.call(this, eventName, callback);
+    this.on(eventName, callback);
+    this.onceListenerBuff.push(callback);
   }
   off(eventName, callback) {
-    http.Server.prototype.off.call(this, eventName, callback);
+    if (!this.events[eventName].length) {
+      delete this.events[eventName];
+    } else {
+      this.events[eventName]
+        = this.events[eventName].filter(eCallback => eCallback !== callback);
+    }
   }
   emit(eventName, ...args) {
-    http.Server.prototype.emit.call(this, eventName, ...args);
+    this.events[eventName].forEach(evCallback => {
+      evCallback(...args);
+
+      if (this.onceListenerBuff.includes(evCallback)) {
+        this.onceListenerBuff
+          = this.onceListenerBuff.filter(cb => cb !== evCallback);
+
+        this.off(eventName, evCallback);
+      };
+    });
   }
   prependListener(eventName, callback) {
-    http.Server.prototype.prependListener.call(this, eventName, callback);
+    if (this.events[eventName]) {
+      this.events[eventName].unshift(callback);
+    } else {
+      this.events[eventName] = [callback];
+    }
   }
   prependOnceListener(eventName, callback) {
-    http.Server.prototype.prependOnceListener.call(this, eventName, callback);
+    this.prependListener(eventName, callback);
+    this.onceListenerBuff.push(callback);
   }
   removeAllListeners(eventName) {
-    http.Server.prototype.removeAllListeners.call(this, eventName);
+    if (this.events[eventName].length) {
+      delete this.events[eventName];
+    }
   }
-  listenerCount(emitter, callback) {
-    return http.Server.prototype.listenerCount.call(this, emitter, callback);
+  listenerCount(eventName) {
+    if (this.events[eventName]) {
+      return this.events[eventName].length;
+    } else {
+      return null;
+    }
   }
 }
 
 module.exports = { MyEventEmitter };
-
