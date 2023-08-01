@@ -26,7 +26,9 @@ class MyEventEmitter {
       return;
     }
 
-    this.events[eventName].filter(listenerName => listenerName !== listener);
+    this.events[eventName] = this.events[eventName].filter(
+      listenerName => listenerName !== listener
+    );
   }
 
   emit(eventName, ...args) {
@@ -63,13 +65,13 @@ class MyEventEmitter {
     if (this.events[eventName]) {
       delete this.events[eventName];
     } else {
-      this.events = {};
+      throw new Error(`${eventName} does not exist`);
     }
   }
 
   listenerCount(eventName) {
     if (!this.events[eventName]) {
-      throw new Error('Event does not exist');
+      return 0;
     }
 
     return this.events[eventName].length;
