@@ -11,6 +11,8 @@ class MyEventEmitter {
     }
 
     this.events[event].push(callback);
+
+    return this;
   }
 
   once(event, callback) {
@@ -21,22 +23,32 @@ class MyEventEmitter {
     };
 
     this.on(event, newCallback);
+
+    return this;
   }
 
   off(event, callback) {
     if (!this.events[event]) {
-      return;
+      throw new Error(`Event ${event} does not exist`);
     }
 
     this.events[event] = this.events[event].filter((cb) => cb !== callback);
+
+    if (this.events[event].length === 0) {
+      delete this.events[event];
+    }
+
+    return this;
   }
 
   emit(event, ...args) {
     if (!this.events[event]) {
-      return;
+      throw new Error(`Event ${event} does not exist`);
     }
 
     this.events[event].forEach((callback) => callback(...args));
+
+    return this;
   }
 
   prependListener(event, callback) {
@@ -45,6 +57,8 @@ class MyEventEmitter {
     }
 
     this.events[event].unshift(callback);
+
+    return this;
   }
 
   prependOnceListener(event, callback) {
@@ -55,6 +69,8 @@ class MyEventEmitter {
     };
 
     this.prependListener(event, newCallback);
+
+    return this;
   }
 
   removeAllListeners(event) {
@@ -63,6 +79,8 @@ class MyEventEmitter {
     }
 
     delete this.events[event];
+
+    return this;
   }
 
   listenerCount(event) {
