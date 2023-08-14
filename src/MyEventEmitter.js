@@ -14,6 +14,8 @@ class MyEventEmitter {
     }
 
     this[_events][eventName].push(listener);
+
+    return this;
   }
 
   once(eventName, listener) {
@@ -24,6 +26,8 @@ class MyEventEmitter {
     };
 
     this.on(eventName, onceListener);
+
+    return this;
   }
 
   off(eventName, listener) {
@@ -33,6 +37,8 @@ class MyEventEmitter {
 
     this[_events][eventName] = this[_events][eventName]
       .filter(currentListener => currentListener !== listener);
+
+    return this;
   }
 
   emit(eventName, ...args) {
@@ -52,6 +58,8 @@ class MyEventEmitter {
     }
 
     this[_events][eventName].unshift(listener);
+
+    return this;
   }
 
   removeAllListeners(eventName) {
@@ -64,6 +72,8 @@ class MyEventEmitter {
     }
 
     delete this[_events][eventName];
+
+    return this;
   }
 
   prependOnceListener(eventName, listener) {
@@ -74,11 +84,13 @@ class MyEventEmitter {
     };
 
     this.prependListener(eventName, onceListener);
+
+    return this;
   }
 
   listenerCount(eventName, listener) {
     if (!(eventName in this[_events])) {
-      return;
+      return 0;
     }
 
     if (!listener) {
@@ -89,4 +101,3 @@ class MyEventEmitter {
       .filter(currentListener => currentListener === listener).length;
   }
 }
-
