@@ -19,7 +19,7 @@ class MyEventEmitter {
     const onceListener = (...args) => {
       this.off(event, onceListener);
       listener(...args);
-    }
+    };
 
     this.on(event, onceListener);
 
@@ -61,7 +61,7 @@ class MyEventEmitter {
     const onceListener = (...args) => {
       this.off(event, onceListener);
       listener(...args);
-    }
+    };
 
     this.prependListener(event, onceListener);
 
