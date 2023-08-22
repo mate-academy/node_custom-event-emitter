@@ -11,6 +11,8 @@ class MyEventEmitter {
     }
 
     this.events[eventName].push(callback);
+
+    return this;
   }
 
   off(eventName, callback) {
@@ -19,6 +21,8 @@ class MyEventEmitter {
         cb => cb !== callback
       );
     }
+
+    return this;
   }
 
   once(eventName, callback) {
@@ -29,12 +33,16 @@ class MyEventEmitter {
     };
 
     this.on(eventName, callbackOnce);
+
+    return this;
   }
 
   emit(eventName, ...args) {
     if (this.events[eventName]) {
       this.events[eventName].forEach(callback => callback(...args));
     }
+
+    return this;
   }
 
   prependListener(eventName, callback) {
@@ -43,6 +51,8 @@ class MyEventEmitter {
     }
 
     this.events[eventName].unshift(callback);
+
+    return this;
   }
 
   prependOnceListener(eventName, callback) {
@@ -53,6 +63,8 @@ class MyEventEmitter {
     };
 
     this.prependListener(eventName, callbackOnce);
+
+    return this;
   }
 
   removeAllListeners(eventName) {
@@ -61,6 +73,8 @@ class MyEventEmitter {
     } else {
       this.events = {};
     }
+
+    return this;
   }
 
   listenerCount(eventName) {
