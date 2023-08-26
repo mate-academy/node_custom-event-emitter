@@ -18,7 +18,7 @@ class MyEventEmitter {
       callBack.apply(this, args);
 
       this.off(eventName, onceWrapper);
-    }
+    };
 
     this.on(eventName, onceWrapper);
   }
@@ -26,7 +26,9 @@ class MyEventEmitter {
   off(eventName, callBack) {
     const eventCallBacks = this.events[eventName];
 
-    if (!eventCallBacks) return;
+    if (!eventCallBacks) {
+      return;
+    }
 
     if (callBack) {
       this.events[eventName] = eventCallBacks.filter(cb => cb !== callBack);
@@ -38,7 +40,9 @@ class MyEventEmitter {
   emit(eventName, ...args) {
     const eventCallBacks = this.events[eventName];
 
-    if (!eventCallBacks) return;
+    if (!eventCallBacks) {
+      return;
+    }
 
     eventCallBacks.forEach(callBack => {
       callBack.apply(this, args);
@@ -58,7 +62,7 @@ class MyEventEmitter {
       callBack.apply(this, args);
 
       this.off(eventName, prependOnceListenerWrapper);
-    }
+    };
 
     this.prependListener(eventName, prependOnceListenerWrapper);
   }
@@ -77,3 +81,7 @@ class MyEventEmitter {
     return eventCallBacks ? eventCallBacks.length : 0;
   }
 }
+
+const myEmitter = new MyEventEmitter();
+
+myEmitter.listenerCount();
