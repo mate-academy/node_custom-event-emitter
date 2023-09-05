@@ -13,7 +13,7 @@ class MyEventEmitter {
 
   validateListener(listener) {
     if (typeof listener !== 'function') {
-      throw new Error('The listener supposed to be a fanction');
+      throw new Error('The listener supposed to be a function');
     }
   }
 
@@ -39,8 +39,8 @@ class MyEventEmitter {
     }
 
     const onceFn = (...args) => {
-      listener(args);
-      this.removeListener(eventName, onceFn);
+      listener(...args);
+      this.off(eventName, onceFn);
     };
 
     this.events[eventName].push(onceFn);
@@ -92,7 +92,7 @@ class MyEventEmitter {
 
     const onceList = (...args) => {
       listener(...args);
-      this.removeListener(eventName, onceList);
+      this.off(eventName, onceList);
     };
 
     if (!(eventName in this.events)) {
