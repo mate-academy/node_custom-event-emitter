@@ -33,7 +33,7 @@ class MyEventEmitter {
     }
     this._events[event] = this._events[event].filter(l => l !== listener);
 
-    if (this._events[event].length === 0) {
+    if (!this._events[event].length) {
       delete this._events[event];
       this._eventsCount--;
     }
