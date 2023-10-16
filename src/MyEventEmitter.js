@@ -11,12 +11,7 @@ class MyEventEmitter {
       this.commonListeners[event] = [];
     }
 
-    const listenerData = {
-      callback,
-      isOnce: false,
-    };
-
-    this.commonListeners[event].push(listenerData);
+    this.commonListeners[event].push(callback);
   }
 
   once(event, callback) {
@@ -24,44 +19,36 @@ class MyEventEmitter {
       this.commonListeners[event] = [];
     }
 
-    const listenerData = {
-      callback,
-      isOnce: true,
+    const onceWrapper = (...args) => {
+      callback(...args);
+      this.off(event, onceWrapper);
     };
 
-    this.commonListeners[event].push(listenerData);
+    this.commonListeners[event].push(onceWrapper);
   }
 
   off(action, callback) {
     if (this.prependListeners[action]) {
       this.prependListeners[action] = this.prependListeners[action]
-        .filter((listener) => listener.callback !== callback);
+        .filter((listener) => listener !== callback);
     }
 
     if (this.commonListeners[action]) {
       this.commonListeners[action] = this.commonListeners[action]
-        .filter((listener) => listener.callback !== callback);
+        .filter((listener) => listener !== callback);
     }
   }
 
   emit(event, ...args) {
     if (this.prependListeners[event]) {
-      this.prependListeners[event].forEach((listener, index) => {
-        listener.callback(...args);
-
-        if (listener.isOnce) {
-          this.prependListeners[event].splice(index, 1);
-        }
+      this.prependListeners[event].forEach((callback, index) => {
+        callback(...args);
       });
     }
 
     if (this.commonListeners[event]) {
-      this.commonListeners[event].forEach((listener, index) => {
-        listener.callback(...args);
-
-        if (listener.isOnce) {
-          this.commonListeners[event].splice(index, 1);
-        }
+      this.commonListeners[event].forEach((callback, index) => {
+        callback(...args);
       });
     }
   }
@@ -71,24 +58,19 @@ class MyEventEmitter {
       this.prependListeners[event] = [];
     }
 
-    const listenerData = {
-      callback,
-      isOnce: false,
-    };
-
-    this.prependListeners[event].push(listenerData);
+    this.prependListeners[event].push(callback);
   }
   prependOnceListener(event, callback) {
     if (!this.prependListeners[event]) {
       this.prependListeners[event] = [];
     }
 
-    const listenerData = {
-      callback,
-      isOnce: true,
+    const onceWrapper = (...args) => {
+      callback(...args);
+      this.off(event, onceWrapper);
     };
 
-    this.prependListeners[event].push(listenerData);
+    this.prependListeners[event].push(onceWrapper);
   }
 
   removeAllListeners(event) {
