@@ -9,11 +9,9 @@ class MyEventEmitter {
   }
 
   on(eventName, listener) {
-    if (eventName in this.events) {
-      this.events[eventName].push(listener);
-    } else {
-      this.events[eventName] = [listener];
-    }
+    (eventName in this.events)
+      ? this.events[eventName].push(listener)
+      : this.events[eventName] = [listener];
   }
 
   once(eventName, callback) {
@@ -22,11 +20,9 @@ class MyEventEmitter {
       callback(...args);
     };
 
-    if (!(eventName in this.events)) {
-      this.events[eventName] = [oneTimeListener];
-    } else {
-      this.events[eventName].push(oneTimeListener);
-    }
+    !(eventName in this.events)
+      ? this.events[eventName] = [oneTimeListener]
+      : this.events[eventName].push(oneTimeListener);
   }
 
   off(eventName, listener) {
@@ -40,11 +36,9 @@ class MyEventEmitter {
   }
 
   prependListener(eventName, listener) {
-    if (eventName in this.events) {
-      this.events[eventName].unshift(listener);
-    } else {
-      this.events[eventName] = [listener];
-    }
+    (eventName in this.events)
+      ? this.events[eventName].unshift(listener)
+      : this.events[eventName] = [listener];
   }
 
   prependOnceListener(eventName, callback) {
@@ -53,11 +47,9 @@ class MyEventEmitter {
       callback(...args);
     };
 
-    if (!(eventName in this.events)) {
-      this.events[eventName] = [oneTimeListener];
-    } else {
-      this.events[eventName].unshift(oneTimeListener);
-    }
+    !(eventName in this.events)
+      ? this.events[eventName] = [oneTimeListener]
+      : this.events[eventName].unshift(oneTimeListener);
   }
 
   removeAllListeners(eventName) {
@@ -73,9 +65,9 @@ class MyEventEmitter {
   listenerCount(eventName, listener) {
     if (listener) {
       return this.events[eventName].filter(el => el === listener).length;
-    } else {
-      return this.events[eventName].length;
     }
+
+    return this.events[eventName].length;
   }
 }
 
