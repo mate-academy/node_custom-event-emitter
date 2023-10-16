@@ -7,6 +7,7 @@ class MyEventEmitter {
   constructor() {
     this.events = {};
   }
+
   on(eventName, listener) {
     if (eventName in this.events) {
       this.events[eventName].push(listener);
@@ -16,15 +17,22 @@ class MyEventEmitter {
 
     return this;
   }
-  once(eventName, listener) {
-    if (eventName in this.events) {
-      this.events[eventName].push(listener);
+
+  once(eventName, callback) {
+    const oneTimeListener = (...args) => {
+      this.off(eventName, oneTimeListener);
+      callback(...args);
+    };
+
+    if (!(eventName in this.events)) {
+      this.events[eventName] = [oneTimeListener];
     } else {
-      this.events[eventName] = [listener];
+      this.events[eventName].push(oneTimeListener);
     }
 
     return this;
   }
+
   off(eventName, listener) {
     this.events[eventName] = this.events[eventName].filter(el => (
       el !== listener
@@ -32,11 +40,13 @@ class MyEventEmitter {
 
     return this;
   }
+
   emit(eventName, ...args) {
     http.Server.prototype.emit.call(server, eventName, ...args);
 
     return this;
   }
+
   prependListener(eventName, listener) {
     if (eventName in this.events) {
       this.events[eventName].unshift(listener);
@@ -46,7 +56,22 @@ class MyEventEmitter {
 
     return this;
   }
-  prependOnceListener() {}
+
+  prependOnceListener(eventName, callback) {
+    const oneTimeListener = (...args) => {
+      this.off(eventName, oneTimeListener);
+      callback(...args);
+    };
+
+    if (!(eventName in this.events)) {
+      this.events[eventName] = [oneTimeListener];
+    } else {
+      this.events[eventName].unshift(oneTimeListener);
+    }
+
+    return this;
+  }
+
   removeAllListeners(eventName) {
     if (eventName) {
       this.events[eventName].length = 0;
@@ -58,6 +83,7 @@ class MyEventEmitter {
 
     return this;
   }
+
   listenerCount(eventName, listener) {
     if (listener) {
       return this.events[eventName].filter(el => el === listener).length;
