@@ -1,5 +1,9 @@
-export class MyEventEmitter {
-  events = [];
+'use strict';
+
+class MyEventEmitter {
+  constructor() {
+    this.events = [];
+  }
 
   on(eventName, cb) {
     this.events.push({
@@ -91,3 +95,5 @@ export class MyEventEmitter {
     return count;
   }
 }
+
+module.exports = { MyEventEmitter };
