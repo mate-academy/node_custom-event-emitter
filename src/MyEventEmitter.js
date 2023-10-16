@@ -14,8 +14,6 @@ class MyEventEmitter {
     } else {
       this.events[eventName] = [listener];
     }
-
-    return this;
   }
 
   once(eventName, callback) {
@@ -29,22 +27,16 @@ class MyEventEmitter {
     } else {
       this.events[eventName].push(oneTimeListener);
     }
-
-    return this;
   }
 
   off(eventName, listener) {
     this.events[eventName] = this.events[eventName].filter(el => (
       el !== listener
     ));
-
-    return this;
   }
 
   emit(eventName, ...args) {
     http.Server.prototype.emit.call(server, eventName, ...args);
-
-    return this;
   }
 
   prependListener(eventName, listener) {
@@ -53,8 +45,6 @@ class MyEventEmitter {
     } else {
       this.events[eventName] = [listener];
     }
-
-    return this;
   }
 
   prependOnceListener(eventName, callback) {
@@ -68,8 +58,6 @@ class MyEventEmitter {
     } else {
       this.events[eventName].unshift(oneTimeListener);
     }
-
-    return this;
   }
 
   removeAllListeners(eventName) {
@@ -80,8 +68,6 @@ class MyEventEmitter {
         this.events[key].length = 0;
       }
     }
-
-    return this;
   }
 
   listenerCount(eventName, listener) {
