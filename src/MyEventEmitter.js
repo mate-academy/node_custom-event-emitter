@@ -2,97 +2,117 @@
 
 class MyEventEmitter {
   constructor() {
-    this.events = [];
+    this.events = {};
   }
 
   on(eventName, cb) {
-    this.events.push({
-      [eventName]: cb,
-      once: false,
-    });
+    if (!cb) {
+      throw new Error('The "listener" argument must be of type'
+      + 'function. Received undefined');
+    }
+
+    if (eventName in this.events) {
+      this.events[eventName].push(cb);
+    } else {
+      this.events[eventName] = [cb];
+    }
 
     return this;
   }
 
   once(eventName, cb) {
-    this.events.push({
-      [eventName]: cb,
-      once: true,
-    });
+    if (!cb) {
+      throw new Error('The "listener" argument must be of type'
+      + 'function. Received undefined');
+    }
+
+    const executeOnce = () => {
+      cb();
+
+      this.off(eventName, executeOnce);
+    };
+
+    if (eventName in this.events) {
+      this.events[eventName].push(executeOnce);
+    } else {
+      this.events[eventName] = [executeOnce];
+    }
 
     return this;
   }
 
   off(eventName, cb) {
-    for (const event of this.events) {
-      if (eventName in event && event[eventName] === cb) {
-        this.events = this.events.filter(evnt => evnt[eventName] !== cb);
-      }
+    if (!cb) {
+      throw new Error('The "listener" argument must be of type'
+      + 'function. Received undefined');
     }
+
+    this.events[eventName] = this.events[eventName]
+      .filter(cbToDel => cbToDel !== cb);
 
     return this;
   }
 
   emit(eventName, ...args) {
-    for (const event of this.events) {
-      if (eventName in event && event.once === false) {
-        event[eventName](args);
-      }
-
-      if (eventName in event && event.once === true) {
-        event[eventName](args);
-
-        this.events = this.events.filter(evnt => !(eventName in evnt));
-      }
-    }
+    this.events[eventName].forEach(evnt => evnt(args));
 
     return this;
   };
 
   prependListener(eventName, cb) {
-    this.events.unshift({
-      [eventName]: cb,
-      once: false,
-    });
+    if (!cb) {
+      throw new Error('The "listener" argument must be of type'
+      + 'function. Received undefined');
+    }
+
+    if (eventName in this.events) {
+      this.events[eventName].unshift(cb);
+    } else {
+      this.events[eventName] = cb;
+    }
 
     return this;
   }
 
   prependOnceListener(eventName, cb) {
-    this.events.unshift({
-      [eventName]: cb,
-      once: true,
-    });
+    if (!cb) {
+      throw new Error('The "listener" argument must be of type'
+      + 'function. Received undefined');
+    }
+
+    const executeOnce = () => {
+      cb();
+
+      this.off(eventName, executeOnce);
+    };
+
+    if (eventName in this.events) {
+      this.events[eventName].unshift(executeOnce);
+    } else {
+      this.events[eventName] = [executeOnce];
+    }
 
     return this;
   }
 
   removeAllListeners(eventName) {
-    if (eventName) {
-      for (const event of this.events) {
-        if (eventName in event) {
-          this.events = this.events.filter(evnt => !(eventName in evnt));
-        }
-      }
+    if (eventName in this.events) {
+      delete this.events[eventName];
 
       return this;
     }
 
-    this.events = [];
+    this.events = {};
 
     return this;
   }
 
   listenerCount(eventName) {
-    let count = 0;
+    if (eventName in this.events) {
+      return this.events[eventName].length;
+    }
 
-    this.events.forEach(event => {
-      if (eventName in event) {
-        count++;
-      }
-    });
-
-    return count;
+    return 0;
   }
 }
 
