@@ -6,9 +6,9 @@ class MyEventEmitter {
   }
 
   on(eventName, cb) {
-    if (!cb) {
+    if (!cb || typeof cb !== 'function') {
       throw new Error('The "listener" argument must be of type'
-      + 'function. Received undefined');
+      + 'function.');
     }
 
     if (eventName in this.events) {
@@ -21,9 +21,9 @@ class MyEventEmitter {
   }
 
   once(eventName, cb) {
-    if (!cb) {
+    if (!cb || typeof cb !== 'function') {
       throw new Error('The "listener" argument must be of type'
-      + 'function. Received undefined');
+      + 'function.');
     }
 
     const executeOnce = () => {
@@ -42,9 +42,9 @@ class MyEventEmitter {
   }
 
   off(eventName, cb) {
-    if (!cb) {
+    if (!cb || typeof cb !== 'function') {
       throw new Error('The "listener" argument must be of type'
-      + 'function. Received undefined');
+      + 'function.');
     }
 
     this.events[eventName] = this.events[eventName]
@@ -54,15 +54,15 @@ class MyEventEmitter {
   }
 
   emit(eventName, ...args) {
-    this.events[eventName].forEach(evnt => evnt(args));
+    this.events[eventName].forEach(evnt => evnt(...args));
 
     return this;
   };
 
   prependListener(eventName, cb) {
-    if (!cb) {
+    if (!cb || typeof cb !== 'function') {
       throw new Error('The "listener" argument must be of type'
-      + 'function. Received undefined');
+      + 'function.');
     }
 
     if (eventName in this.events) {
@@ -75,9 +75,9 @@ class MyEventEmitter {
   }
 
   prependOnceListener(eventName, cb) {
-    if (!cb) {
+    if (!cb || typeof cb !== 'function') {
       throw new Error('The "listener" argument must be of type'
-      + 'function. Received undefined');
+      + 'function.');
     }
 
     const executeOnce = () => {
