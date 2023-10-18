@@ -18,23 +18,18 @@ class MyEventEmitter {
 
     this.on(event, onceCallback);
   }
+
   off(event, callback) {
-    const listener = this.events[event] || [];
-
-    if (!listener) {
-      return this;
-    }
-
-    for (let i = this.length; i > 0; i++) {
-      if (listener[i] === callback) {
-        listener.splice(i, 1);
-      }
+    if (this.events[event]) {
+      this.events[event] = this.events[event]
+        .filter((listener) => listener !== callback);
     }
   }
+
   emit(event, args) {
     const listener = this.events[event] || [];
 
-    if (!listener) {
+    if (!listener.length) {
       return false;
     }
 
@@ -44,10 +39,12 @@ class MyEventEmitter {
 
     return true;
   }
+
   prependListener(event, callback) {
     this.events[event] = this.events[event] || [];
     this.events[event].unshift(callback);
   }
+
   prependOnceListener(event, callback) {
     function onceCallback(data) {
       callback();
@@ -56,6 +53,7 @@ class MyEventEmitter {
 
     this.prependListener(event, onceCallback);
   }
+
   removeAllListeners(event) {
     if (!event) {
       for (const list in this.events) {
@@ -66,9 +64,8 @@ class MyEventEmitter {
     }
 
     delete this.events[event];
-
-    return this;
   }
+
   listenerCount(event) {
     const events = this.events[event] || [];
 
