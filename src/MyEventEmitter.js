@@ -10,11 +10,9 @@ class MyEventEmitter {
       throw new Error();
     }
 
-    if (this.listeners.hasOwnProperty(eventName)) {
-      this.listeners[eventName].push(callBack);
-    } else {
-      this.listeners[eventName] = [ callBack ];
-    }
+    this.listeners[eventName] = this.listeners.hasOwnProperty(eventName)
+      ? [...this.listeners[eventName], callBack]
+      : [ callBack ];
 
     return this;
   }
@@ -68,11 +66,9 @@ class MyEventEmitter {
       throw new Error();
     }
 
-    if (this.listeners.hasOwnProperty(eventName)) {
-      this.listeners[eventName].unshift(callBack);
-    } else {
-      this.listeners[eventName] = [ callBack ];
-    }
+    this.listeners[eventName] = this.listeners.hasOwnProperty(eventName)
+      ? [callBack, ...this.listeners[eventName]]
+      : [ callBack ];
 
     return this;
   }
