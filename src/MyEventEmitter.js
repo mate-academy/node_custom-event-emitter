@@ -2,46 +2,46 @@
 
 class MyEventEmitter {
   constructor() {
-    this.listeners = {};
+    this.allListeners = {};
   }
 
-  on(eventName, cb) {
-    if (typeof cb !== 'function') {
+  on(eventName, newListener) {
+    if (typeof newListener !== 'function') {
       throw new Error('Listener must be a function!');
     } else {
-      this.listeners[eventName] = this.listeners[eventName] || [];
-      this.listeners[eventName].push(cb);
+      this.allListeners[eventName] = this.allListeners[eventName] || [];
+      this.allListeners[eventName].push(newListener);
 
       return this;
     }
   };
 
-  once(eventName, cb) {
-    if (typeof cb !== 'function') {
+  once(eventName, newListener) {
+    if (typeof newListener !== 'function') {
       throw new Error('Listener must be a function!');
     }
 
-    this.listeners[eventName] = this.listeners[eventName] || [];
+    this.allListeners[eventName] = this.allListeners[eventName] || [];
 
     const onceWrapper = (...args) => {
-      cb(...args);
+      newListener(...args);
       this.off(eventName, onceWrapper);
     };
 
-    this.listeners[eventName].push(onceWrapper);
+    this.allListeners[eventName].push(onceWrapper);
 
     return this;
   };
 
-  off(type, cb) {
-    const listenersArrayByType = this.listeners[type];
+  off(type, listenerToRemove) {
+    const listenersArrayByType = this.allListeners[type];
 
     if (!listenersArrayByType) {
       return this;
     };
 
     for (let i = listenersArrayByType.length; i > 0; i--) {
-      if (listenersArrayByType[i] === cb) {
+      if (listenersArrayByType[i] === listenerToRemove) {
         listenersArrayByType.splice(i, 1);
         break;
       }
@@ -51,55 +51,55 @@ class MyEventEmitter {
   };
 
   emit(eventName, ...args) {
-    const cbs = this.listeners[eventName];
+    const listenersArrayByType = this.allListeners[eventName];
 
-    if (!cbs) {
+    if (!listenersArrayByType) {
       return false;
     }
 
-    cbs.forEach((cb) => {
-      cb(...args);
+    listenersArrayByType.forEach((listener) => {
+      listener(...args);
     });
 
     return true;
   };
 
-  prependListener(eventName, cb) {
-    if (typeof cb !== 'function') {
+  prependListener(eventName, newListener) {
+    if (typeof newListener !== 'function') {
       throw new Error('Listener must be a function!');
     } else {
-      this.listeners[eventName] = this.listeners[eventName] || [];
-      this.listeners[eventName].unshift(cb);
+      this.allListeners[eventName] = this.allListeners[eventName] || [];
+      this.allListeners[eventName].unshift(newListener);
 
       return this;
     }
   };
 
-  prependOnceListener(eventName, cb) {
-    if (typeof cb !== 'function') {
+  prependOnceListener(eventName, newListener) {
+    if (typeof newListener !== 'function') {
       throw new Error('Listener must be a function!');
     }
 
-    this.listeners[eventName] = this.listeners[eventName] || [];
+    this.allListeners[eventName] = this.allListeners[eventName] || [];
 
     const onceWrapper = () => {
-      cb();
+      newListener();
       this.off(eventName, onceWrapper);
     };
 
-    this.listeners[eventName].unshift(onceWrapper);
+    this.allListeners[eventName].unshift(onceWrapper);
 
     return this;
   };
 
   removeAllListeners(eventName) {
-    this.listeners[eventName] = [];
+    this.allListeners[eventName] = [];
 
     return this;
   };
 
   listenerCount(eventName) {
-    const listenersByType = this.listeners[eventName] || [];
+    const listenersByType = this.allListeners[eventName] || [];
 
     return listenersByType.length;
   };
