@@ -6,13 +6,19 @@ class MyEventEmitter {
   };
 
   on(eventName, listener) {
+    if (!this.events[eventName]) {
+      this.events[eventName] = [];
+    }
+
     this.events[eventName].push(listener);
 
     return this;
   }
 
   once(eventName, listener) {
-    this.listeners[eventName] = this.listeners[eventName] || [];
+    this.events = this.events || {};
+
+    this.events[eventName] = this.events[eventName] || [];
 
     const onceWrapper = () => {
       listener();
@@ -72,9 +78,7 @@ class MyEventEmitter {
   }
 
   listenerCount(eventName) {
-    const fns = this.listeners[eventName] || [];
-
-    return fns.length;
+    return this.events[eventName].length;
   }
 }
 
