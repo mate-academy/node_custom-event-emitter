@@ -31,11 +31,13 @@ const logOmitMiddle = () => {
 const Emiter = new MyEventEmitter();
 
 console.log('#-----------------------------#');
+
 Emiter.on('hello', logTwo);
 Emiter.on('hello', logThree);
 Emiter.prependListener('hello', logOne);
 
 Emiter.emit('hello');
+
 console.log(Emiter.listenerCount('hello'));
 
 console.log('-----------------------------');

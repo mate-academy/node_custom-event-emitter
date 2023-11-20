@@ -73,7 +73,10 @@ class MyEventEmitter {
 
   removeAllListeners() {
     this.listeners = {};
+
+    return this;
   }
+
   listenerCount(event) {
     const callbacks = this.listeners[event] || [];
 
