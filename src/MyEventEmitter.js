@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 'use strict';
 
 class MyEventEmitter {
@@ -17,12 +19,15 @@ class MyEventEmitter {
       listener(...args);
       this.off(eventName, onceWrapper);
     };
+
     this.on(eventName, onceWrapper);
   }
 
   off(eventName, listener) {
     if (this.listeners.has(eventName)) {
-      const listeners = this.listeners.get(eventName).filter((l) => l !== listener);
+      const listeners
+      = this.listeners.get(eventName).filter((l) => l !== listener);
+
       this.listeners.set(eventName, listeners);
     }
   }
@@ -47,6 +52,7 @@ class MyEventEmitter {
       listener(...args);
       this.off(eventName, onceWrapper);
     };
+
     this.prependListener(eventName, onceWrapper);
   }
 
@@ -59,7 +65,9 @@ class MyEventEmitter {
   }
 
   listenerCount(eventName) {
-    return this.listeners.has(eventName) ? this.listeners.get(eventName).length : 0;
+    return this.listeners.has(eventName)
+      ? this.listeners.get(eventName).length
+      : 0;
   }
 }
 
@@ -86,4 +94,4 @@ console.log('Number of listeners:', myEmitter.listenerCount('myEvent'));
 
 module.exports = {
   MyEventEmitter,
-}
+};
