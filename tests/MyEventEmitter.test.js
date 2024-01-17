@@ -27,24 +27,41 @@ describe('MyEventEmitter', () => {
     expect(emitter).not.toBeInstanceOf(EventEmitter);
   });
 
-  test('should have working "on" and "emit" methods', () => {
-    const callback = jest.fn();
-
-    emitter.on('testEvent', callback);
-    emitter.emit('testEvent', 1, 2, 3);
-
-    expect(callback).toHaveBeenCalledWith(1, 2, 3);
+  test('should have working "listenerCount" method', () => {
+    expect(emitter.listenerCount('listenerCountEvent')).toBe(0);
   });
 
-  test('should have working "once" method', () => {
-    const callback = jest.fn();
+  test('should have working "on" method', () => {
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
 
-    emitter.once('onceEvent', callback);
-    emitter.emit('onceEvent', 'Hello');
-    emitter.emit('onceEvent', 'World');
+    expect(emitter.listenerCount('onEvent1')).toBe(0);
 
-    expect(callback).toHaveBeenCalledWith('Hello');
-    expect(callback).toHaveBeenCalledTimes(1);
+    emitter.on('onEvent1', callback1);
+
+    expect(emitter.listenerCount('onEvent1')).toBe(1);
+
+    emitter.on('onEvent1', callback2);
+    emitter.on('onEvent2', callback2);
+
+    expect(emitter.listenerCount('onEvent1')).toBe(2);
+    expect(emitter.listenerCount('onEvent2')).toBe(1);
+  });
+
+  test('should have working "emit" method', () => {
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
+    const callback3 = jest.fn();
+
+    emitter.on('emitEvent1', callback1);
+    emitter.on('emitEvent1', callback2);
+    emitter.on('emitEvent2', callback3);
+    emitter.emit('emitEvent1', 1, 2, 3);
+
+    expect(callback1).toHaveBeenCalledWith(1, 2, 3);
+    expect(callback2).toHaveBeenCalledWith(1, 2, 3);
+    expect(callback3).not.toHaveBeenCalled();
+    expect(emitter.listenerCount('emitEvent1')).toBe(2);
   });
 
   test('should have working "off" method', () => {
@@ -53,55 +70,82 @@ describe('MyEventEmitter', () => {
 
     emitter.on('offEvent', callback1);
     emitter.on('offEvent', callback2);
+
+    expect(emitter.listenerCount('offEvent')).toBe(2);
+
     emitter.off('offEvent', callback1);
     emitter.emit('offEvent', 'test');
 
     expect(callback1).not.toHaveBeenCalled();
     expect(callback2).toHaveBeenCalledWith('test');
+    expect(emitter.listenerCount('offEvent')).toBe(1);
+  });
+
+  test('should have working "once" method', () => {
+    const callback1 = jest.fn();
+
+    emitter.once('onceEvent', callback1);
+
+    expect(emitter.listenerCount('onceEvent')).toBe(1);
+
+    emitter.emit('onceEvent', 'Hello');
+    emitter.emit('onceEvent', 'World');
+
+    expect(callback1).toHaveBeenCalledWith('Hello');
+    expect(callback1).toHaveBeenCalledTimes(1);
+    expect(emitter.listenerCount('onceEvent')).toBe(0);
   });
 
   test('should have working "prependListener" method', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
 
-    emitter.on('prependEvent', callback1);
-    emitter.prependListener('prependEvent', callback2);
-    emitter.emit('prependEvent', 'test');
+    emitter.on('prependListenerEvent', callback1);
+    emitter.prependListener('prependListenerEvent', callback2);
+    emitter.emit('prependListenerEvent', 'test');
 
-    expect(callback2).toHaveBeenCalledWith('test');
+    expect(emitter.listenerCount('prependListenerEvent')).toBe(2);
     expect(callback1).toHaveBeenCalledWith('test');
+    expect(callback2).toHaveBeenCalledWith('test');
+
+    expect(callback2.mock.invocationCallOrder[0])
+      .toBeLessThan(callback1.mock.invocationCallOrder[0]);
   });
 
   test('should have working "prependOnceListener" method', () => {
-    const callback = jest.fn();
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
 
-    emitter.prependOnceListener('prependOnceEvent', callback);
-    emitter.emit('prependOnceEvent', 'test');
-    emitter.emit('prependOnceEvent', 'test2');
+    emitter.on('prependOnceListenerEvent', callback1);
+    emitter.prependOnceListener('prependOnceListenerEvent', callback2);
 
-    expect(callback).toHaveBeenCalledWith('test');
-    expect(callback).toHaveBeenCalledTimes(1);
+    expect(emitter.listenerCount('prependOnceListenerEvent')).toBe(2);
+
+    emitter.emit('prependOnceListenerEvent', 'test');
+    emitter.emit('prependOnceListenerEvent', 'test2');
+
+    expect(emitter.listenerCount('prependOnceListenerEvent')).toBe(1);
+    expect(callback1).toHaveBeenCalledWith('test');
+    expect(callback2).toHaveBeenCalledWith('test');
+    expect(callback2).toHaveBeenCalledTimes(1);
+
+    expect(callback2.mock.invocationCallOrder[0])
+      .toBeLessThan(callback1.mock.invocationCallOrder[0]);
   });
 
   test('should have working "removeAllListeners" method', () => {
     const callback = jest.fn();
 
-    emitter.on('removeAllEvent', callback);
-    emitter.emit('removeAllEvent', 'test');
-    emitter.removeAllListeners('removeAllEvent');
-    emitter.emit('removeAllEvent', 'test2');
+    emitter.on('removeAllListenersEvent', callback);
+    emitter.emit('removeAllListenersEvent', 'test');
+
+    expect(emitter.listenerCount('removeAllListenersEvent')).toBe(1);
+
+    emitter.removeAllListeners('removeAllListenersEvent');
+    emitter.emit('removeAllListenersEvent', 'test2');
 
     expect(callback).toHaveBeenCalledWith('test');
     expect(callback).toHaveBeenCalledTimes(1);
-  });
-
-  test('should have working "listenerCount" method', () => {
-    const callback1 = jest.fn();
-    const callback2 = jest.fn();
-
-    emitter.on('countEvent', callback1);
-    emitter.once('countEvent', callback2);
-
-    expect(emitter.listenerCount('countEvent')).toBe(2);
+    expect(emitter.listenerCount('removeAllListenersEvent')).toBe(0);
   });
 });
