@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 'use strict';
 
 const fs = require('fs');
@@ -12,7 +13,7 @@ describe('MyEventEmitter', () => {
     emitter = new MyEventEmitter();
   });
 
-  test('should not use external libraries', () => {
+  test('should verify absence of external library dependencies in MyEventEmitter', () => {
     const sourceFile = path
       .resolve(__dirname, '..', 'src', 'MyEventEmitter.js');
     const fileContent = fs.readFileSync(sourceFile, 'utf8');
@@ -23,15 +24,19 @@ describe('MyEventEmitter', () => {
     expect(hasESImports).toBe(false);
   });
 
-  test('should not use Node.js EventEmitter', () => {
+  test('should confirm MyEventEmitter is distinct from Node.js EventEmitter', () => {
     expect(emitter).not.toBeInstanceOf(EventEmitter);
   });
 
-  test('should have working "listenerCount" method', () => {
+  test('should accurately count listeners for a specific event with "listenerCount" method', () => {
     expect(emitter.listenerCount('listenerCountEvent')).toBe(0);
+
+    emitter.on('listenerCountEvent', () => {});
+
+    expect(emitter.listenerCount('listenerCountEvent')).toBe(1);
   });
 
-  test('should have working "on" method', () => {
+  test('should add event listeners and reflect correct count using the "on" method', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
 
@@ -48,7 +53,7 @@ describe('MyEventEmitter', () => {
     expect(emitter.listenerCount('onEvent2')).toBe(1);
   });
 
-  test('should have working "emit" method', () => {
+  test('should trigger callbacks added for a given event with "emit" method', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
     const callback3 = jest.fn();
@@ -64,7 +69,7 @@ describe('MyEventEmitter', () => {
     expect(emitter.listenerCount('emitEvent1')).toBe(2);
   });
 
-  test('should have working "off" method', () => {
+  test('should remove specified event listener using the "off" method and update listener count', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
 
@@ -81,7 +86,7 @@ describe('MyEventEmitter', () => {
     expect(emitter.listenerCount('offEvent')).toBe(1);
   });
 
-  test('should have working "once" method', () => {
+  test('should register and invoke a callback exactly once for an event with "once" method', () => {
     const callback1 = jest.fn();
 
     emitter.once('onceEvent', callback1);
@@ -96,7 +101,7 @@ describe('MyEventEmitter', () => {
     expect(emitter.listenerCount('onceEvent')).toBe(0);
   });
 
-  test('should have working "prependListener" method', () => {
+  test('should add a new listener at the beginning for an event with "prependListener" method', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
 
@@ -112,7 +117,7 @@ describe('MyEventEmitter', () => {
       .toBeLessThan(callback1.mock.invocationCallOrder[0]);
   });
 
-  test('should have working "prependOnceListener" method', () => {
+  test('should prepend a one-time listener and invoke it once with "prependOnceListener" method', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
 
@@ -133,7 +138,7 @@ describe('MyEventEmitter', () => {
       .toBeLessThan(callback1.mock.invocationCallOrder[0]);
   });
 
-  test('should have working "removeAllListeners" method', () => {
+  test('should clear all listeners for an event with "removeAllListeners" method', () => {
     const callback = jest.fn();
 
     emitter.on('removeAllListenersEvent', callback);
