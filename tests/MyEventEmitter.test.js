@@ -41,10 +41,12 @@ describe('MyEventEmitter', () => {
     const callback2 = jest.fn();
 
     expect(emitter.listenerCount('onEvent1')).toBe(0);
+    expect(emitter.listenerCount('onEvent2')).toBe(0);
 
     emitter.on('onEvent1', callback1);
 
     expect(emitter.listenerCount('onEvent1')).toBe(1);
+    expect(emitter.listenerCount('onEvent2')).toBe(0);
 
     emitter.on('onEvent1', callback2);
     emitter.on('onEvent2', callback2);
@@ -63,10 +65,26 @@ describe('MyEventEmitter', () => {
     emitter.on('emitEvent2', callback3);
     emitter.emit('emitEvent1', 1, 2, 3);
 
+    expect(emitter.listenerCount('emitEvent1')).toBe(2);
+    expect(emitter.listenerCount('emitEvent2')).toBe(1);
     expect(callback1).toHaveBeenCalledWith(1, 2, 3);
     expect(callback2).toHaveBeenCalledWith(1, 2, 3);
     expect(callback3).not.toHaveBeenCalled();
+
+    expect(callback1.mock.invocationCallOrder[0])
+      .toBeLessThan(callback2.mock.invocationCallOrder[0]);
+
+    emitter.on('emitEvent2', callback1);
+    emitter.emit('emitEvent2', 'test');
+
     expect(emitter.listenerCount('emitEvent1')).toBe(2);
+    expect(emitter.listenerCount('emitEvent2')).toBe(2);
+    expect(callback3).toHaveBeenCalledWith('test');
+    expect(callback1).toHaveBeenCalledWith('test');
+    expect(callback2).not.toHaveBeenCalledWith('test');
+
+    expect(callback3.mock.invocationCallOrder[0])
+      .toBeLessThan(callback1.mock.invocationCallOrder[1]);
   });
 
   test('should remove specified event listener using the "off" method and update listener count', () => {
