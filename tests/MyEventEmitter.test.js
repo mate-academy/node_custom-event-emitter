@@ -6,6 +6,40 @@ const path = require('path');
 const MyEventEmitter = require('../src/MyEventEmitter');
 const EventEmitter = require('events');
 
+const getRandomEventName = () => `testEvent-${Math.random()}`;
+
+const getRandomArgument = () => {
+  const types = ['string', 'number', 'boolean', 'object', 'undefined', 'null'];
+  const type = Math.floor(Math.random() * types.length);
+
+  switch (type) {
+    case 0:
+      return 'test';
+    case 1:
+      return Math.random();
+    case 2:
+      return Math.random() > 0.5;
+    case 3:
+      return {
+        test: 'test',
+        test2: Math.random(),
+        test3: Math.random() > 0.5,
+      };
+    case 4:
+      return undefined;
+    case 5:
+      return null;
+    default:
+      return undefined;
+  }
+};
+
+const getRandomArguments = () => {
+  const count = Math.floor(Math.random() * 10) + 1;
+
+  return Array.from({ length: count }, getRandomArgument);
+};
+
 describe('MyEventEmitter', () => {
   let emitter;
 
@@ -28,235 +62,246 @@ describe('MyEventEmitter', () => {
     expect(emitter).not.toBeInstanceOf(EventEmitter);
   });
 
-  describe('with "listenerCount" method', () => {
-    test('should return 0 for a non-existent event', () => {
-      expect(emitter.listenerCount('nonExistentEvent')).toBe(0);
-    });
-
-    test('should accurately count listeners for a specific event', () => {
-      expect(emitter.listenerCount('listenerCountEvent')).toBe(0);
-
-      emitter.on('listenerCountEvent', () => {});
-
-      expect(emitter.listenerCount('listenerCountEvent')).toBe(1);
+  describe('"listenerCount" method', () => {
+    test('should always return 0 for an event without listeners', () => {
+      expect(emitter.listenerCount(getRandomEventName()))
+        .toBe(0);
     });
   });
 
-  describe('with "on" method', () => {
-    test('should add a listener for a given event', () => {
+  describe('"on" method', () => {
+    test('should add a listener for a given event and increment the listener count', () => {
+      const eventName = getRandomEventName();
       const callback = jest.fn();
 
-      emitter.on('onEvent', callback);
-      emitter.emit('onEvent', 'test');
+      emitter.on(eventName, callback);
 
-      expect(callback).toHaveBeenCalledWith('test');
+      expect(emitter.listenerCount(eventName)).toBe(1);
     });
 
-    test('should add multiple listeners for a given event', () => {
+    test('should add multiple listeners for a given event and increment the listener count', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('onEvent', callback1);
-      emitter.on('onEvent', callback2);
-      emitter.emit('onEvent', 'test');
+      emitter.on(eventName, callback1);
+      emitter.on(eventName, callback2);
 
-      expect(callback1).toHaveBeenCalledWith('test');
-      expect(callback2).toHaveBeenCalledWith('test');
+      expect(emitter.listenerCount(eventName)).toBe(2);
     });
 
-    test('should add multiple listeners for multiple events', () => {
+    test('should add multiple listeners for multiple events and increment the listener count', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('onEvent1', callback1);
-      emitter.on('onEvent2', callback2);
-      emitter.emit('onEvent1', 'test1');
-      emitter.emit('onEvent2', 'test2');
+      emitter.on(eventName1, callback1);
+      emitter.on(eventName2, callback2);
 
-      expect(callback1).toHaveBeenCalledWith('test1');
-      expect(callback2).toHaveBeenCalledWith('test2');
+      expect(emitter.listenerCount(eventName1)).toBe(1);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
     });
   });
 
-  describe('with "emit" method', () => {
-    test('should trigger callbacks added for a given event', () => {
+  describe('"emit" method', () => {
+    test('should trigger callbacks added for a given event with any number of arguments', () => {
+      const eventName = getRandomEventName();
+      const multipleArguments = getRandomArguments();
       const callback1 = jest.fn();
-      const callback2 = jest.fn();
 
-      emitter.on('emitEvent', callback1);
-      emitter.on('emitEvent', callback2);
-      emitter.emit('emitEvent', 'test');
+      emitter.on(eventName, callback1);
 
-      expect(emitter.listenerCount('emitEvent')).toBe(2);
-      expect(callback1).toHaveBeenCalledWith('test');
-      expect(callback2).toHaveBeenCalledWith('test');
+      emitter.emit(eventName, ...multipleArguments);
+
+      expect(callback1).toHaveBeenCalledWith(...multipleArguments);
     });
 
     test('should trigger callbacks added for multiple events', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('emitEvent1', callback1);
-      emitter.on('emitEvent2', callback2);
-      emitter.emit('emitEvent1', 'test1');
-      emitter.emit('emitEvent2', 'test2');
+      emitter.on(eventName1, callback1);
+      emitter.on(eventName2, callback2);
 
-      expect(emitter.listenerCount('emitEvent1')).toBe(1);
-      expect(emitter.listenerCount('emitEvent2')).toBe(1);
-      expect(callback1).toHaveBeenCalledWith('test1');
-      expect(callback2).toHaveBeenCalledWith('test2');
+      emitter.emit(eventName1);
+      emitter.emit(eventName2);
+
+      expect(callback1).toHaveBeenCalledTimes(1);
+      expect(callback2).toHaveBeenCalledTimes(1);
     });
 
     test('should trigger callbacks added for multiple events multiple times', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('emitEvent1', callback1);
-      emitter.on('emitEvent2', callback2);
-      emitter.emit('emitEvent1', 'test1');
-      emitter.emit('emitEvent2', 'test2');
-      emitter.emit('emitEvent1', 'test3');
-      emitter.emit('emitEvent2', 'test4');
+      emitter.on(eventName1, callback1);
+      emitter.on(eventName2, callback2);
 
-      expect(emitter.listenerCount('emitEvent1')).toBe(1);
-      expect(emitter.listenerCount('emitEvent2')).toBe(1);
-      expect(callback1).toHaveBeenCalledWith('test1');
-      expect(callback1).toHaveBeenCalledWith('test3');
-      expect(callback2).toHaveBeenCalledWith('test2');
-      expect(callback2).toHaveBeenCalledWith('test4');
+      emitter.emit(eventName1);
+      emitter.emit(eventName2);
+      emitter.emit(eventName1);
+      emitter.emit(eventName2);
+      emitter.emit(eventName2);
+
+      expect(callback1).toHaveBeenCalledTimes(2);
+      expect(callback2).toHaveBeenCalledTimes(3);
     });
 
-    test('should trigger callbacks added for event in order of registration', () => {
+    test('should trigger callbacks added for event triggered in order of registration', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('emitEvent', callback1);
-      emitter.on('emitEvent', callback2);
-      emitter.emit('emitEvent', 'test');
+      emitter.on(eventName, callback1);
+      emitter.on(eventName, callback2);
+
+      emitter.emit(eventName);
 
       expect(callback1.mock.invocationCallOrder[0])
         .toBeLessThan(callback2.mock.invocationCallOrder[0]);
     });
   });
 
-  describe('with "once" method', () => {
-    test('should add a one-time listener for a given event', () => {
+  describe('"once" method', () => {
+    test('should add a one-time listener for a given event that is removed after being triggered', () => {
+      const eventName = getRandomEventName();
       const callback = jest.fn();
 
-      emitter.once('onceEvent', callback);
-      emitter.emit('onceEvent', 'test');
-      emitter.emit('onceEvent', 'test');
+      emitter.once(eventName, callback);
 
-      expect(callback).toHaveBeenCalledWith('test');
+      emitter.emit(eventName);
+      emitter.emit(eventName);
+
       expect(callback).toHaveBeenCalledTimes(1);
+      expect(emitter.listenerCount(eventName)).toBe(0);
     });
 
-    test('should add multiple one-time listeners for a given event', () => {
+    test('should add a one-time listener for a given event that is removed after being triggered with any number of arguments', () => {
+      const eventName = getRandomEventName();
+      const multipleArguments1 = getRandomArguments();
+      const multipleArguments2 = getRandomArguments();
+      const callback = jest.fn();
+
+      emitter.once(eventName, callback);
+
+      emitter.emit(eventName, ...multipleArguments1);
+      emitter.emit(eventName, ...multipleArguments2);
+
+      expect(callback).toHaveBeenCalledWith(...multipleArguments1);
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(emitter.listenerCount(eventName)).toBe(0);
+    });
+
+    test('should add multiple one-time listeners for a given event that are removed after being triggered', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.once('onceEvent', callback1);
-      emitter.once('onceEvent', callback2);
+      emitter.once(eventName, callback1);
+      emitter.once(eventName, callback2);
 
-      expect(emitter.listenerCount('onceEvent')).toBe(2);
+      emitter.emit(eventName);
+      emitter.emit(eventName);
+      emitter.emit(eventName);
 
-      emitter.emit('onceEvent', 'test');
-      emitter.emit('onceEvent', 'test');
-      emitter.emit('onceEvent', 'test');
-
-      expect(callback1).toHaveBeenCalledWith('test');
       expect(callback1).toHaveBeenCalledTimes(1);
-      expect(callback2).toHaveBeenCalledWith('test');
       expect(callback2).toHaveBeenCalledTimes(1);
-      expect(emitter.listenerCount('onceEvent')).toBe(0);
+      expect(emitter.listenerCount(eventName)).toBe(0);
     });
 
-    test('should add multiple one-time listeners for multiple events', () => {
+    test('should add multiple one-time listeners for multiple events that are removed after being triggered', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.once('onceEvent1', callback1);
-      emitter.once('onceEvent2', callback2);
+      emitter.once(eventName1, callback1);
+      emitter.once(eventName2, callback2);
 
-      expect(emitter.listenerCount('onceEvent1')).toBe(1);
-      expect(emitter.listenerCount('onceEvent2')).toBe(1);
+      emitter.emit(eventName1);
+      emitter.emit(eventName2);
+      emitter.emit(eventName1);
+      emitter.emit(eventName2);
 
-      emitter.emit('onceEvent1', 'test1');
-      emitter.emit('onceEvent2', 'test2');
-      emitter.emit('onceEvent1', 'test1');
-      emitter.emit('onceEvent2', 'test2');
-
-      expect(callback1).toHaveBeenCalledWith('test1');
       expect(callback1).toHaveBeenCalledTimes(1);
-      expect(callback2).toHaveBeenCalledWith('test2');
       expect(callback2).toHaveBeenCalledTimes(1);
-      expect(emitter.listenerCount('onceEvent1')).toBe(0);
-      expect(emitter.listenerCount('onceEvent2')).toBe(0);
+      expect(emitter.listenerCount(eventName1)).toBe(0);
+      expect(emitter.listenerCount(eventName2)).toBe(0);
     });
 
-    test('should add multiple one-time listeners for event in order of registration', () => {
+    test('should add multiple one-time listeners for event triggered in order of registration', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.once('onceEvent', callback1);
-      emitter.once('onceEvent', callback2);
-      emitter.emit('onceEvent', 'test');
+      emitter.once(eventName, callback1);
+      emitter.once(eventName, callback2);
 
-      expect(callback1).toHaveBeenCalledWith('test');
-      expect(callback1).toHaveBeenCalledTimes(1);
-      expect(callback2).toHaveBeenCalledWith('test');
-      expect(callback2).toHaveBeenCalledTimes(1);
+      emitter.emit(eventName);
 
       expect(callback1.mock.invocationCallOrder[0])
         .toBeLessThan(callback2.mock.invocationCallOrder[0]);
-      expect(emitter.listenerCount('onceEvent')).toBe(0);
     });
 
-    test('should not remove listeners for other events', () => {
-      const callback1 = jest.fn();
+    test('should not affect one-time listeners for other events with same callback', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback = jest.fn();
 
-      emitter.once('onceEvent1', callback1);
-      emitter.once('onceEvent2', callback1);
-      emitter.emit('onceEvent1', 'test1');
+      emitter.once(eventName1, callback);
+      emitter.once(eventName2, callback);
+      emitter.emit(eventName1);
 
-      expect(callback1).toHaveBeenCalledWith('test1');
-      expect(callback1).toHaveBeenCalledTimes(1);
-      expect(emitter.listenerCount('onceEvent1')).toBe(0);
-      expect(emitter.listenerCount('onceEvent2')).toBe(1);
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(emitter.listenerCount(eventName1)).toBe(0);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
     });
   });
 
-  describe('with "prependListener" method', () => {
-    test('should add a listener at the beginning for a given event', () => {
+  describe('"prependListener" method', () => {
+    test('should add a listener at the beginning of the listeners array for a given event and trigger it with any number of arguments', () => {
+      const eventName = getRandomEventName();
+      const multipleArguments = getRandomArguments();
+      const callback = jest.fn();
+
+      emitter.prependListener(eventName, callback);
+      emitter.emit(eventName, ...multipleArguments);
+
+      expect(callback).toHaveBeenCalledWith(...multipleArguments);
+    });
+
+    test('should add a listener at the beginning of the listeners array for a given event', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('prependListenerEvent', callback1);
-      emitter.prependListener('prependListenerEvent', callback2);
-      emitter.emit('prependListenerEvent', 'test');
+      emitter.on(eventName, callback1);
+      emitter.prependListener(eventName, callback2);
+      emitter.emit(eventName);
 
-      expect(emitter.listenerCount('prependListenerEvent')).toBe(2);
-      expect(callback1).toHaveBeenCalledWith('test');
-      expect(callback2).toHaveBeenCalledWith('test');
+      expect(emitter.listenerCount(eventName)).toBe(2);
 
       expect(callback2.mock.invocationCallOrder[0])
         .toBeLessThan(callback1.mock.invocationCallOrder[0]);
     });
 
-    test('should add multiple listeners at the beginning for a given event', () => {
+    test('should add multiple listeners at the beginning of the listeners array for a given event in order of registration', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
       const callback3 = jest.fn();
 
-      emitter.on('prependListenerEvent', callback1);
-      emitter.prependListener('prependListenerEvent', callback2);
-      emitter.prependListener('prependListenerEvent', callback3);
-      emitter.emit('prependListenerEvent', 'test');
+      emitter.on(eventName, callback1);
+      emitter.prependListener(eventName, callback2);
+      emitter.prependListener(eventName, callback3);
+      emitter.emit(eventName);
 
-      expect(emitter.listenerCount('prependListenerEvent')).toBe(3);
-      expect(callback1).toHaveBeenCalledWith('test');
-      expect(callback2).toHaveBeenCalledWith('test');
-      expect(callback3).toHaveBeenCalledWith('test');
+      expect(emitter.listenerCount(eventName)).toBe(3);
 
       expect(callback3.mock.invocationCallOrder[0])
         .toBeLessThan(callback2.mock.invocationCallOrder[0]);
@@ -266,49 +311,53 @@ describe('MyEventEmitter', () => {
     });
   });
 
-  describe('with "prependOnceListener" method', () => {
-    test('should add a one-time listener at the beginning for a given event', () => {
+  describe('"prependOnceListener" method', () => {
+    test('should add a one-time listener at the beginning of the listeners array for a given event and trigger it with any number of arguments', () => {
+      const eventName = getRandomEventName();
+      const multipleArguments = getRandomArguments();
+      const callback = jest.fn();
+
+      emitter.prependOnceListener(eventName, callback);
+      emitter.emit(eventName, ...multipleArguments);
+
+      expect(callback).toHaveBeenCalledWith(...multipleArguments);
+    });
+
+    test('should add a one-time listener at the beginning of the listeners array for a given event and trigger it once', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('prependOnceListenerEvent', callback1);
-      emitter.prependOnceListener('prependOnceListenerEvent', callback2);
+      emitter.on(eventName, callback1);
+      emitter.prependOnceListener(eventName, callback2);
 
-      expect(emitter.listenerCount('prependOnceListenerEvent')).toBe(2);
+      emitter.emit(eventName);
+      emitter.emit(eventName);
 
-      emitter.emit('prependOnceListenerEvent', 'test');
-      emitter.emit('prependOnceListenerEvent', 'test');
-
-      expect(callback1).toHaveBeenCalledWith('test');
       expect(callback1).toHaveBeenCalledTimes(2);
-      expect(callback2).toHaveBeenCalledWith('test');
       expect(callback2).toHaveBeenCalledTimes(1);
 
       expect(callback2.mock.invocationCallOrder[0])
         .toBeLessThan(callback1.mock.invocationCallOrder[0]);
 
-      expect(emitter.listenerCount('prependOnceListenerEvent')).toBe(1);
+      expect(emitter.listenerCount(eventName)).toBe(1);
     });
 
-    test('should add multiple one-time listeners at the beginning for a given event', () => {
+    test('should add multiple one-time listeners at the beginning of the listeners array for a given event and trigger them in order of registration once', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
       const callback3 = jest.fn();
 
-      emitter.on('prependOnceListenerEvent', callback1);
-      emitter.prependOnceListener('prependOnceListenerEvent', callback2);
-      emitter.prependOnceListener('prependOnceListenerEvent', callback3);
+      emitter.on(eventName, callback1);
+      emitter.prependOnceListener(eventName, callback2);
+      emitter.prependOnceListener(eventName, callback3);
 
-      expect(emitter.listenerCount('prependOnceListenerEvent')).toBe(3);
+      emitter.emit(eventName);
+      emitter.emit(eventName);
 
-      emitter.emit('prependOnceListenerEvent', 'test');
-      emitter.emit('prependOnceListenerEvent', 'test');
-
-      expect(callback1).toHaveBeenCalledWith('test');
       expect(callback1).toHaveBeenCalledTimes(2);
-      expect(callback2).toHaveBeenCalledWith('test');
       expect(callback2).toHaveBeenCalledTimes(1);
-      expect(callback3).toHaveBeenCalledWith('test');
       expect(callback3).toHaveBeenCalledTimes(1);
 
       expect(callback3.mock.invocationCallOrder[0])
@@ -317,90 +366,106 @@ describe('MyEventEmitter', () => {
       expect(callback2.mock.invocationCallOrder[0])
         .toBeLessThan(callback1.mock.invocationCallOrder[0]);
 
-      expect(emitter.listenerCount('prependOnceListenerEvent')).toBe(1);
+      expect(emitter.listenerCount(eventName)).toBe(1);
     });
   });
 
-  describe('with "off" method', () => {
-    test('should remove listener for a given event', () => {
+  describe('"off" method', () => {
+    test('should remove a listener by reference for a given event and update the listener count', () => {
+      const eventName = getRandomEventName();
       const callback = jest.fn();
 
-      emitter.on('offEvent', callback);
-      emitter.emit('offEvent', 'test');
+      emitter.on(eventName, callback);
 
-      expect(emitter.listenerCount('offEvent')).toBe(1);
+      expect(emitter.listenerCount(eventName)).toBe(1);
 
-      emitter.off('offEvent', callback);
-      emitter.emit('offEvent', 'test');
+      emitter.off(eventName, callback);
 
-      expect(callback).toHaveBeenCalledTimes(1);
-      expect(emitter.listenerCount('offEvent')).toBe(0);
+      expect(emitter.listenerCount(eventName)).toBe(0);
     });
 
-    test('should remove listener for a given event with multiple listeners', () => {
+    test('should remove a listener by reference for a given event and don\'t affect other events', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('offEvent', callback1);
-      emitter.on('offEvent', callback2);
-      emitter.emit('offEvent', 'test');
+      emitter.on(eventName, callback1);
+      emitter.on(eventName, callback2);
 
-      expect(emitter.listenerCount('offEvent')).toBe(2);
+      expect(emitter.listenerCount(eventName)).toBe(2);
 
-      emitter.off('offEvent', callback1);
-      emitter.emit('offEvent', 'test');
+      emitter.off(eventName, callback1);
 
-      expect(callback1).toHaveBeenCalledTimes(1);
-      expect(callback2).toHaveBeenCalledTimes(2);
-      expect(emitter.listenerCount('offEvent')).toBe(1);
+      expect(emitter.listenerCount(eventName)).toBe(1);
+    });
+
+    test('should remove a listener by reference for a given event and don\'t affect other events with same callback', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback = jest.fn();
+
+      emitter.on(eventName1, callback);
+      emitter.on(eventName2, callback);
+
+      expect(emitter.listenerCount(eventName1)).toBe(1);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
+
+      emitter.off(eventName1, callback);
+
+      expect(emitter.listenerCount(eventName1)).toBe(0);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
     });
   });
 
-  describe('with "removeAllListeners" method', () => {
-    test('should remove all listeners for a given event', () => {
+  describe('"removeAllListeners" method', () => {
+    test('should remove all listeners for a given event and update the listener count', () => {
+      const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('removeAllListenersEvent', callback1);
-      emitter.on('removeAllListenersEvent', callback2);
-      emitter.emit('removeAllListenersEvent', 'test');
+      emitter.on(eventName, callback1);
+      emitter.on(eventName, callback2);
 
-      expect(emitter.listenerCount('removeAllListenersEvent')).toBe(2);
+      expect(emitter.listenerCount(eventName)).toBe(2);
 
-      emitter.removeAllListeners('removeAllListenersEvent');
-      emitter.emit('removeAllListenersEvent', 'test');
+      emitter.removeAllListeners(eventName);
 
-      expect(callback1).toHaveBeenCalledTimes(1);
-      expect(callback2).toHaveBeenCalledTimes(1);
-      expect(emitter.listenerCount('removeAllListenersEvent')).toBe(0);
+      expect(emitter.listenerCount(eventName)).toBe(0);
     });
 
     test('should remove all listeners for a given event and don\'t affect other events', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
 
-      emitter.on('removeAllListenersEvent1', callback1);
-      emitter.on('removeAllListenersEvent2', callback2);
-      emitter.emit('removeAllListenersEvent1', 'test');
-      emitter.emit('removeAllListenersEvent2', 'test');
+      emitter.on(eventName1, callback1);
+      emitter.on(eventName2, callback2);
 
-      expect(emitter.listenerCount('removeAllListenersEvent1')).toBe(1);
-      expect(emitter.listenerCount('removeAllListenersEvent2')).toBe(1);
+      expect(emitter.listenerCount(eventName1)).toBe(1);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
 
-      emitter.removeAllListeners('removeAllListenersEvent1');
-      emitter.emit('removeAllListenersEvent1', 'test');
-      emitter.emit('removeAllListenersEvent2', 'test');
+      emitter.removeAllListeners(eventName1);
 
-      expect(callback1).toHaveBeenCalledTimes(1);
-      expect(callback2).toHaveBeenCalledTimes(2);
-      expect(emitter.listenerCount('removeAllListenersEvent1')).toBe(0);
-      expect(emitter.listenerCount('removeAllListenersEvent2')).toBe(1);
+      expect(emitter.listenerCount(eventName1)).toBe(0);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
     });
 
-    test('should do nothing if no listeners for a given event', () => {
-      emitter.removeAllListeners('removeAllListenersEvent');
+    test('should remove all listeners for a given event and don\'t affect other events with same callback', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback = jest.fn();
 
-      expect(emitter.listenerCount('removeAllListenersEvent')).toBe(0);
+      emitter.on(eventName1, callback);
+      emitter.on(eventName2, callback);
+
+      expect(emitter.listenerCount(eventName1)).toBe(1);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
+
+      emitter.removeAllListeners(eventName1);
+
+      expect(emitter.listenerCount(eventName1)).toBe(0);
+      expect(emitter.listenerCount(eventName2)).toBe(1);
     });
   });
 });
