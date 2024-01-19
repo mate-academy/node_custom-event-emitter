@@ -7,7 +7,7 @@ const { faker } = require('@faker-js/faker');
 const MyEventEmitter = require('../src/MyEventEmitter');
 const EventEmitter = require('events');
 
-const getRandomEventName = () => `testEvent-${Math.random()}`;
+const getRandomEventName = () => faker.string.uuid();
 
 const getRandomArgument = () => {
   const types = ['string', 'number', 'boolean', 'object', 'undefined', 'null'];
