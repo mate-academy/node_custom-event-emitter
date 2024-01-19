@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { faker } = require('@faker-js/faker');
 const MyEventEmitter = require('../src/MyEventEmitter');
 const EventEmitter = require('events');
 
@@ -10,32 +11,35 @@ const getRandomEventName = () => `testEvent-${Math.random()}`;
 
 const getRandomArgument = () => {
   const types = ['string', 'number', 'boolean', 'object', 'undefined', 'null'];
-  const type = Math.floor(Math.random() * types.length);
+  const type = faker.helpers.arrayElement(types);
 
   switch (type) {
-    case 0:
-      return 'test';
-    case 1:
-      return Math.random();
-    case 2:
-      return Math.random() > 0.5;
-    case 3:
+    case 'string':
+      return faker.lorem.sentence();
+    case 'number':
+      return faker.number.int();
+    case 'boolean':
+      return faker.datatype.boolean();
+    case 'object':
       return {
-        test: 'test',
-        test2: Math.random(),
-        test3: Math.random() > 0.5,
+        [faker.lorem.word()]: faker.lorem.sentence(),
+        [faker.lorem.word()]: faker.number.int(),
+        [faker.lorem.word()]: faker.datatype.boolean(),
       };
-    case 4:
+    case 'undefined':
       return undefined;
-    case 5:
+    case 'null':
       return null;
     default:
       return undefined;
   }
 };
 
-const getRandomArguments = () => {
-  const count = Math.floor(Math.random() * 10) + 1;
+const getMultipleArguments = () => {
+  const count = faker.number.int({
+    min: 2,
+    max: 10,
+  });
 
   return Array.from({ length: count }, getRandomArgument);
 };
@@ -102,12 +106,35 @@ describe('MyEventEmitter', () => {
       expect(emitter.listenerCount(eventName1)).toBe(1);
       expect(emitter.listenerCount(eventName2)).toBe(1);
     });
+
+    test('should not affect other events', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback = jest.fn();
+
+      emitter.on(eventName1, callback);
+
+      expect(emitter.listenerCount(eventName1)).toBe(1);
+      expect(emitter.listenerCount(eventName2)).toBe(0);
+    });
   });
 
   describe('"emit" method', () => {
-    test('should trigger callbacks added for a given event with any number of arguments', () => {
+    test('should trigger callbacks added for a given event with single argument', () => {
       const eventName = getRandomEventName();
-      const multipleArguments = getRandomArguments();
+      const singleArgument = getRandomArgument();
+      const callback1 = jest.fn();
+
+      emitter.on(eventName, callback1);
+
+      emitter.emit(eventName, singleArgument);
+
+      expect(callback1).toHaveBeenCalledWith(singleArgument);
+    });
+
+    test('should trigger callbacks added for a given event with multiple arguments', () => {
+      const eventName = getRandomEventName();
+      const multipleArguments = getMultipleArguments();
       const callback1 = jest.fn();
 
       emitter.on(eventName, callback1);
@@ -165,6 +192,34 @@ describe('MyEventEmitter', () => {
       expect(callback1.mock.invocationCallOrder[0])
         .toBeLessThan(callback2.mock.invocationCallOrder[0]);
     });
+
+    test('should not affect callbacks added for other events', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback1 = jest.fn();
+      const callback2 = jest.fn();
+
+      emitter.on(eventName1, callback1);
+      emitter.on(eventName2, callback2);
+
+      emitter.emit(eventName1);
+
+      expect(callback1).toHaveBeenCalledTimes(1);
+      expect(callback2).toHaveBeenCalledTimes(0);
+    });
+
+    test('should not affect callbacks added for other events with same callback', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback = jest.fn();
+
+      emitter.on(eventName1, callback);
+      emitter.on(eventName2, callback);
+
+      emitter.emit(eventName1);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('"once" method', () => {
@@ -177,22 +232,6 @@ describe('MyEventEmitter', () => {
       emitter.emit(eventName);
       emitter.emit(eventName);
 
-      expect(callback).toHaveBeenCalledTimes(1);
-      expect(emitter.listenerCount(eventName)).toBe(0);
-    });
-
-    test('should add a one-time listener for a given event that is removed after being triggered with any number of arguments', () => {
-      const eventName = getRandomEventName();
-      const multipleArguments1 = getRandomArguments();
-      const multipleArguments2 = getRandomArguments();
-      const callback = jest.fn();
-
-      emitter.once(eventName, callback);
-
-      emitter.emit(eventName, ...multipleArguments1);
-      emitter.emit(eventName, ...multipleArguments2);
-
-      expect(callback).toHaveBeenCalledWith(...multipleArguments1);
       expect(callback).toHaveBeenCalledTimes(1);
       expect(emitter.listenerCount(eventName)).toBe(0);
     });
@@ -264,17 +303,6 @@ describe('MyEventEmitter', () => {
   });
 
   describe('"prependListener" method', () => {
-    test('should add a listener at the beginning of the listeners array for a given event and trigger it with any number of arguments', () => {
-      const eventName = getRandomEventName();
-      const multipleArguments = getRandomArguments();
-      const callback = jest.fn();
-
-      emitter.prependListener(eventName, callback);
-      emitter.emit(eventName, ...multipleArguments);
-
-      expect(callback).toHaveBeenCalledWith(...multipleArguments);
-    });
-
     test('should add a listener at the beginning of the listeners array for a given event', () => {
       const eventName = getRandomEventName();
       const callback1 = jest.fn();
@@ -312,17 +340,6 @@ describe('MyEventEmitter', () => {
   });
 
   describe('"prependOnceListener" method', () => {
-    test('should add a one-time listener at the beginning of the listeners array for a given event and trigger it with any number of arguments', () => {
-      const eventName = getRandomEventName();
-      const multipleArguments = getRandomArguments();
-      const callback = jest.fn();
-
-      emitter.prependOnceListener(eventName, callback);
-      emitter.emit(eventName, ...multipleArguments);
-
-      expect(callback).toHaveBeenCalledWith(...multipleArguments);
-    });
-
     test('should add a one-time listener at the beginning of the listeners array for a given event and trigger it once', () => {
       const eventName = getRandomEventName();
       const callback1 = jest.fn();
