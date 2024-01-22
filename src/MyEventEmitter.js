@@ -5,21 +5,16 @@ class MyEventEmitter {
 
   on(eventName, listener) {
     if (!(eventName in this.listeners)) {
-      this.listeners[eventName] = [listener];
+      this.listeners[eventName] = [{callback: listener, once: false}];
     } else {
-      this.listeners[eventName].push(listener);
+      this.listeners[eventName].push({callback: listener, once: false});
     }
 
     return this;
   }
 
   off(eventName, listener) {
-    if (eventName in this.listeners && this.listeners[eventName].includes(listener)) {
-      this.listeners[eventName] = this.listeners[eventName]
-        .filter(callback => callback !== listener);
-    }
-
-    if (!this.listeners[eventName].length) {
+    if (eventName in this.listeners) {
       delete this.listeners[eventName];
     }
 
@@ -27,24 +22,23 @@ class MyEventEmitter {
   }
 
   once(eventName, listener) {
-    const useOnce = (...args) => {
-      listener(...args)
-      this.off(eventName, useOnce);
+    if (!(eventName in this.listeners)) {
+      this.listeners[eventName] = [{callback: listener, once: true}];
+    } else {
+      this.listeners[eventName].push({callback: listener, once: true});
     }
-
-    this.on(eventName, useOnce)
-    // this.on(eventName, listener(() => this.off(eventName, listener)))
-
-    // if (this.listeners[eventName]) {
-    //   delete this.listeners[eventName];
-    // }
 
     return this;
   }
 
   emit(eventName, ...args) {
     if (this.listeners[eventName]) {
-      this.listeners[eventName].forEach(callback => callback(...args));
+      this.listeners[eventName].forEach(lis => {
+        lis.callback(...args);
+        if (lis.once === true) {
+          this.off(eventName, lis.callback)
+        }
+      });
 
       return true;
     }
@@ -54,19 +48,20 @@ class MyEventEmitter {
 
   prependListener(eventName, listener) {
     if (!(eventName in this.listeners)) {
-      this.listeners[eventName] = [listener];
+      this.listeners[eventName] = [{callback: listener, once: false}];
     } else {
-      this.listeners[eventName].unshift(listener);
+      this.listeners[eventName].unshift({callback: listener, once: false});
     }
 
     return this;
   }
 
   prependOnceListener(eventName, listener) {
-    this.prependListener(eventName, (...args) => {
-      listener(args);
-      this.off(eventName, listener);
-    });
+    if (!(eventName in this.listeners)) {
+      this.listeners[eventName] = [{callback: listener, once: true}];
+    } else {
+      this.listeners[eventName].unshift({callback: listener, once: true});
+    }
   }
 
   removeAllListeners(...eventNames) {
@@ -103,15 +98,13 @@ console.log(t)
 t.on('a', a);
 t.on('a', c);
 t.on('b', a);
+t.on('c', b);
 t.once('c', a);
 
-// t.off('b', a);
-// t.emit('c');
+t.off('a', a);
 t.prependListener('a', b)
-// t.removeAllListeners();
-// console.log(t.on('c', () => console.log(hi)))
-console.log(t)
-// console.log(t.listenerCount('a'))
+t.removeAllListeners('c');
+console.log(t.listeners)
 
 
 module.exports = {
