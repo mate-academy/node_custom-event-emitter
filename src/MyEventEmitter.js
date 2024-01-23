@@ -3,13 +3,16 @@
 class MyEventEmitter {
   listeners = {};
 
-  on(eventName, listener) {
+  #addListeners(eventName, obj, method) {
     if (!(eventName in this.listeners)) {
-      this.listeners[eventName] = [{callback: listener, once: false}];
+      this.listeners[eventName] = [obj];
     } else {
-      this.listeners[eventName].push({callback: listener, once: false});
+      this.listeners[eventName][method](obj);
     }
+  }
 
+  on(eventName, listener) {
+    this.#addListeners(eventName, {callback: listener, once: false}, 'push');
     return this;
   }
 
@@ -22,11 +25,7 @@ class MyEventEmitter {
   }
 
   once(eventName, listener) {
-    if (!(eventName in this.listeners)) {
-      this.listeners[eventName] = [{callback: listener, once: true}];
-    } else {
-      this.listeners[eventName].push({callback: listener, once: true});
-    }
+    this.#addListeners(eventName, {callback: listener, once: true}, 'push');
 
     return this;
   }
@@ -47,21 +46,15 @@ class MyEventEmitter {
   }
 
   prependListener(eventName, listener) {
-    if (!(eventName in this.listeners)) {
-      this.listeners[eventName] = [{callback: listener, once: false}];
-    } else {
-      this.listeners[eventName].unshift({callback: listener, once: false});
-    }
+    this.#addListeners(eventName, {callback: listener, once: false}, 'unshift');
 
     return this;
   }
 
   prependOnceListener(eventName, listener) {
-    if (!(eventName in this.listeners)) {
-      this.listeners[eventName] = [{callback: listener, once: true}];
-    } else {
-      this.listeners[eventName].unshift({callback: listener, once: true});
-    }
+    this.#addListeners(eventName, {callback: listener, once: true}, 'unshift');
+
+    return this;
   }
 
   removeAllListeners(...eventNames) {
@@ -87,25 +80,6 @@ class MyEventEmitter {
       .filter(callback => callback === listener).length || 0;
   }
 }
-
-const t = new MyEventEmitter();
-
-function a() {}
-function b() {}
-function c() {}
-
-console.log(t)
-t.on('a', a);
-t.on('a', c);
-t.on('b', a);
-t.on('c', b);
-t.once('c', a);
-
-t.off('a', a);
-t.prependListener('a', b)
-t.removeAllListeners('c');
-console.log(t.listeners)
-
 
 module.exports = {
   MyEventEmitter,
