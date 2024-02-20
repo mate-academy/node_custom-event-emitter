@@ -50,7 +50,7 @@ class MyEventEmitter {
   }
 
   listenerCount(eventName) {
-    return this._events[eventName] ? this._events[eventName].length : 0;
+    return (this._events[eventName] || []).length;
   }
 
   _getOnceWrapper(eventName, callback) {
