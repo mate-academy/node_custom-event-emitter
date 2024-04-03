@@ -2,66 +2,97 @@
 
 class MyEventEmitter {
   constructor() {
-    this.events = {};
+    this.listeners = {};
+  }
+
+  emptyListener(eventName) {
+    if (!this.listeners[eventName]) {
+      this.listeners[eventName] = [];
+    }
+  }
+
+  setValidation(eventName, eventListener) {
+    if (
+      !(typeof eventName === 'string' && typeof eventListener === 'function')
+    ) {
+      throw new Error('ERROR: invalid arguments');
+    }
+  }
+
+  onceArgs(eventName, eventListener) {
+    const event = (...args) => {
+      eventListener(...args);
+      this.off(eventName, event);
+    };
+
+    return event;
   }
 
   on(eventName, eventListener) {
-    if (!this.events[eventName]) {
-      this.events[eventName] = [];
-    }
+    this.setValidation(eventName, eventListener);
+    this.emptyListener(eventName);
 
-    this.events[eventName].push(eventListener);
+    this.listeners[eventName].push(eventListener);
+
+    return this;
   }
 
   once(eventName, eventListener) {
-    const listener = (args) => {
-      eventListener(args);
-      this.off(eventName, listener);
-    };
+    this.setValidation(eventName, eventListener);
+    this.emptyListener(eventName);
 
-    this.on(eventName, listener);
+    this.listeners[eventName].push(this.onceArgs(eventName, eventListener));
+
+    return this;
   }
 
   off(eventName, eventListener) {
-    if (this.events[eventName]) {
-      this.events[eventName] = this.events[eventName].filter(
-        (eventCallback) => eventListener !== eventCallback,
-      );
-    }
+    this.listeners[eventName] = this.listeners[eventName].filter(
+      (listener) => listener !== eventListener,
+    );
+
+    return this;
   }
 
   emit(eventName, ...args) {
-    this.events[eventName].forEach((listener) => listener(...args));
+    this.listeners[eventName].forEach((listener) => listener(...args));
+
+    return this;
   }
 
   prependListener(eventName, eventListener) {
-    if (!this.events[eventName]) {
-      this.events[eventName] = [];
-    }
+    this.setValidation(eventName, eventListener);
+    this.emptyListener(eventName);
 
-    this.events[eventName].unshift(eventListener);
+    this.listeners[eventName].unshift(eventListener);
+
+    return this;
   }
 
   prependOnceListener(eventName, eventListener) {
-    if (!this.events[eventName]) {
-      this.events[eventName] = [];
-    }
+    this.setValidation(eventName, eventListener);
+    this.emptyListener(eventName);
 
-    const listener = (args) => {
-      eventListener(args);
-      this.off(eventName, listener);
-    };
+    this.listeners[eventName].unshift(this.onceArgs(eventName, eventListener));
 
-    this.events[eventName].unshift(listener);
+    return this;
   }
 
   removeAllListeners(eventName) {
-    this.events[eventName] = [];
+    if (this.listeners[eventName]) {
+      delete this.listeners[eventName];
+    }
+
+    return this;
   }
 
   listenerCount(eventName) {
-    if (this.events[eventName]) {
-      return this.events[eventName].length;
+    if (!eventName) {
+      throw new Error('ERROR: eventName isn`t passed');
+    }
+
+    if (this.listeners[eventName]) {
+      return this.listeners[eventName].length;
     }
 
     return 0;
