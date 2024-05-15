@@ -12,19 +12,13 @@ class MyEventEmitter {
     this.events[eventName].push(listener);
   }
 
-  // once(eventName, listener) {
-  //   if (!this.events[eventName]) {
-  //     this.events[eventName] = [];
-  //   }
-  //   this.events[eventName].push({ cb: listener, onetime: true });
-  // }
-
   once(event, listener) {
     const onceWrapper = (...args) => {
       listener(...args);
-      this.off(event, onceWrapper); // Remove the wrapper after the first call
+      this.off(event, onceWrapper);
     };
-    this.on(event, onceWrapper); // Use the 'on' method to add the wrapper
+
+    this.on(event, onceWrapper);
   }
 
   off(eventName, listener) {
@@ -41,12 +35,8 @@ class MyEventEmitter {
     if (!this.events[eventName]) {
       return;
     }
-    for (const listener of this.events[eventName]) {
-      // const { cb, onetime } = listener;
 
-      // if (onetime) {
-      //   listener = null;
-      // }
+    for (const listener of this.events[eventName]) {
       listener(...args);
     }
   }
@@ -63,6 +53,7 @@ class MyEventEmitter {
       listener(...args);
       this.off(eventName, onceWrapper);
     };
+
     this.prependListener(eventName, onceWrapper);
   }
 
