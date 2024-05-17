@@ -9,23 +9,25 @@ class MyEventEmitter {
     }
 
     this.events[type] = this.events[type] || [];
-    this.events[type].push(callback);
+    this.events[type].push({ isOnce: false, cb: callback });
   }
 
   once(type, callback) {
-    const tempCallback = (...args) => {
-      callback(...args);
+    if (typeof callback !== 'function') {
+      throw new Error('Listener must be a function!');
+    }
 
-      this.off(type, tempCallback);
-    };
-
-    this.on(type, tempCallback);
+    this.events[type] = this.events[type] || [];
+    this.events[type].push({ isOnce: true, cb: callback });
   }
 
   off(type, callback) {
     if (this.events[type]) {
       this.events[type].forEach((listener, index) => {
-        if (listener === callback) {
+        // eslint-disable-next-line no-console
+        console.log(listener.cb, callback);
+
+        if (listener.cb === callback) {
           this.events[type] = this.events[type].filter((_, i) => i !== index);
         }
       });
@@ -35,7 +37,11 @@ class MyEventEmitter {
   emit(type, ...args) {
     if (this.events[type]) {
       this.events[type].forEach((callback) => {
-        callback(...args);
+        callback.cb(...args);
+
+        if (callback.isOnce) {
+          this.off(type, callback.cb);
+        }
       });
     }
   }
@@ -46,17 +52,16 @@ class MyEventEmitter {
     }
 
     this.events[type] = this.events[type] || [];
-    this.events[type].unshift(callback);
+    this.events[type] = [{ isOnce: false, cb: callback }, ...this.events[type]];
   }
 
   prependOnceListener(type, callback) {
-    const tempCallback = (...args) => {
-      callback(...args);
+    if (typeof callback !== 'function') {
+      throw new Error('Listener must be a function!');
+    }
 
-      this.off(type, tempCallback);
-    };
-
-    this.prependListener(type, tempCallback);
+    this.events[type] = this.events[type] || [];
+    this.events[type] = [{ isOnce: true, cb: callback }, ...this.events[type]];
   }
 
   removeAllListeners(type) {
