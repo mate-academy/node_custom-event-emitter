@@ -24,9 +24,6 @@ class MyEventEmitter {
   off(type, callback) {
     if (this.events[type]) {
       this.events[type].forEach((listener, index) => {
-        // eslint-disable-next-line no-console
-        console.log(listener.cb, callback);
-
         if (listener.cb === callback) {
           this.events[type] = this.events[type].filter((_, i) => i !== index);
         }
