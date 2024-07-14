@@ -17,11 +17,10 @@ class MyEventEmitter {
 
   once(event, listener) {
     const onceWrapper = (...args) => {
-      listener.apply(this, args);
+      listener(args);
       this.off(event, onceWrapper);
     };
 
-    onceWrapper.originalListener = listener;
     this.on(event, onceWrapper);
 
     return this;
@@ -32,9 +31,7 @@ class MyEventEmitter {
       return this;
     }
 
-    this.events[event] = this.events[event].filter(
-      (l) => l !== listener && l.originalListener !== listener,
-    );
+    this.events[event] = this.events[event].filter((l) => l !== listener);
 
     return this;
   }
@@ -63,11 +60,10 @@ class MyEventEmitter {
 
   prependOnceListener(event, listener) {
     const onceWrapper = (...args) => {
-      listener.apply(this, args);
+      listener(args);
       this.off(event, onceWrapper);
     };
 
-    onceWrapper.originalListener = listener;
     this.prependListener(event, onceWrapper);
 
     return this;
