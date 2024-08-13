@@ -1,14 +1,89 @@
 'use strict';
 
 class MyEventEmitter {
-  on() {}
-  once() {}
-  off() {}
-  emit() {}
-  prependListener() {}
-  prependOnceListener() {}
-  removeAllListeners() {}
-  listenerCount() {}
+  constructor() {
+    this.events = {};
+  }
+
+  on(event, listener) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(listener);
+
+    return this;
+  }
+
+  once(event, listener) {
+    const onceWrapper = (...args) => {
+      listener(...args);
+      this.off(event, onceWrapper);
+    };
+
+    this.on(event, onceWrapper);
+
+    return this;
+  }
+
+  off(event, listener) {
+    if (!this.events[event]) {
+      return this;
+    }
+
+    this.events[event] = this.events[event].filter((l) => l !== listener);
+
+    return this;
+  }
+
+  emit(event, ...args) {
+    if (!this.events[event]) {
+      return false;
+    }
+
+    this.events[event].forEach((listener) => {
+      listener(...args);
+    });
+
+    return true;
+  }
+
+  prependListener(event, listener) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].unshift(listener);
+
+    return this;
+  }
+
+  prependOnceListener(event, listener) {
+    const onceWrapper = (...args) => {
+      listener(...args);
+      this.off(event, onceWrapper);
+    };
+
+    this.prependListener(event, onceWrapper);
+
+    return this;
+  }
+
+  removeAllListeners(event) {
+    if (event) {
+      delete this.events[event];
+    } else {
+      this.events = {};
+    }
+
+    return this;
+  }
+
+  listenerCount(event) {
+    if (!this.events[event]) {
+      return 0;
+    }
+
+    return this.events[event].length;
+  }
 }
 
 module.exports = MyEventEmitter;
