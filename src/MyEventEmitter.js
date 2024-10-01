@@ -1,20 +1,55 @@
 'use strict';
 
+function findEvent(listeners, eventName) {
+  return listeners.find((listener) =>
+    Object.keys(listener).includes(eventName));
+}
+
 class MyEventEmitter {
   listeners = [];
   on(event, callback) {
-    this.listeners.push({ [event]: callback });
+    const possibleEvent = findEvent(this.listeners, event);
+
+    if (possibleEvent) {
+      this.listeners = this.listeners.map((listener) => {
+        if (Object.keys(listener).includes(event)) {
+          return { [event]: [...listener[event], { callback }] };
+        }
+
+        return listener;
+      });
+    }
+    this.listeners.push({ [event]: [{ callback }] });
   }
   once(event, callback) {
-    this.listeners.push({ [event]: callback, once: true });
+    const possibleEvent = findEvent(this.listeners, event);
+
+    if (possibleEvent) {
+      this.listeners = this.listeners.map((listener) => {
+        if (Object.keys(listener).includes(event)) {
+          return { [event]: [...listener[event], { callback, once: true }] };
+        }
+
+        return listener;
+      });
+
+      return;
+    }
+    this.listeners.push({ [event]: [{ callback, once: true }] });
   }
   off(event, callback) {
-    this.listeners = this.listeners.filter(
-      (listener) =>
-        !Object.keys(listener).includes(event) ||
-        (listener[event].toString() !== callback.toString() &&
-          Object.keys(listener).includes(event)),
-    );
+    this.listeners = this.listeners.map((listener) => {
+      if (Object.keys(listener).includes(event)) {
+        const filteredCallbacks = listener[event].filter(
+          (callbacks) =>
+            callbacks['callback'].toString() !== callback.toString(),
+        );
+
+        return { [event]: filteredCallbacks };
+      }
+
+      return listener;
+    });
   }
   emit(event, ...args) {
     const listeners = this.listeners.filter(
@@ -25,57 +60,67 @@ class MyEventEmitter {
     );
 
     if (listeners.length) {
-      listeners.forEach((listener) => listener[event](args));
+      listeners.forEach((listener) =>
+        listener[event].forEach((callback) => callback['callback'](...args)));
 
-      this.listeners = this.listeners.filter((listener) => {
-        const keys = Object.keys(listener);
+      this.listeners = this.listeners.map((listener) => {
+        if (Object.keys(listener).includes(event)) {
+          const filteredCallbacks = listener[event].filter(
+            (callback) => !callback['once'],
+          );
 
-        return (
-          !keys.includes(event) ||
-          (keys.includes(event) && !keys.includes('once'))
-        );
+          return { [event]: filteredCallbacks };
+        }
+
+        return listener;
       });
     }
   }
   prependListener(event, callback) {
-    return (this.listeners = [{ [event]: callback }, ...this.listeners]);
+    this.listeners = this.listeners.map((listener) => {
+      if (Object.keys(listener).includes(event)) {
+        const prependQueue = listener[event].filter(
+          (tempCallback) => tempCallback['type'] === 'prepend',
+        );
+
+        return {
+          [event]: [
+            ...prependQueue,
+            { callback, type: 'prepend' },
+            ...listener[event].slice(prependQueue.length),
+          ],
+        };
+      }
+
+      return listener;
+    });
   }
   prependOnceListener(event, callback) {
-    return (this.listeners = [
-      { [event]: callback, once: true },
-      ...this.listeners,
-    ]);
+    this.listeners = this.listeners.map((listener) => {
+      if (Object.keys(listener).includes(event)) {
+        return { [event]: [{ callback, once: true }, ...listener[event]] };
+      }
+
+      return listener;
+    });
   }
-  removeAllListeners() {
-    return (this.listeners = []);
+  removeAllListeners(event) {
+    if (event) {
+      this.listeners = this.listeners.filter(
+        (listener) => !Object.keys(listener).includes(event),
+      );
+
+      return;
+    }
+
+    this.listeners = [];
   }
-  listenerCount() {
-    return this.listeners.length;
+  listenerCount(event) {
+    const possibleEvent = this.listeners.find((listener) =>
+      Object.keys(listener).includes(event));
+
+    return possibleEvent ? possibleEvent[event].length : 0;
   }
 }
-
-// const emitter = new MyEventEmitter();
-
-// const callback = () => {
-//   console.log('hello');
-// };
-
-// const callback1 = () => {
-//   console.log('hello1');
-// };
-
-// emitter.on('yes', () => console.log('yes'));
-
-// emitter.on('hello', callback);
-// emitter.on('hello', callback1);
-// emitter.on('hello', () => {
-//   console.log('yo!');
-// });
-
-// emitter.emit('hello');
-// emitter.off('hello', () => {
-//   console.log('hello');
-// });
-// emitter.emit('hello');
 
 module.exports = MyEventEmitter;
