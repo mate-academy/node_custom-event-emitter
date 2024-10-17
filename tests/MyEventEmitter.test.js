@@ -52,8 +52,12 @@ describe('MyEventEmitter', () => {
   });
 
   test('should NOT use external library dependencies', () => {
-    const sourceFile = path
-      .resolve(__dirname, '..', 'src', 'MyEventEmitter.js');
+    const sourceFile = path.resolve(
+      __dirname,
+      '..',
+      'src',
+      'MyEventEmitter.js',
+    );
     const fileContent = fs.readFileSync(sourceFile, 'utf8');
     const hasCommonJSRequire = /require\(/g.test(fileContent);
     const hasESImports = /import\s+\S+\s+from\s+['"].+['"]/g.test(fileContent);
@@ -68,8 +72,7 @@ describe('MyEventEmitter', () => {
 
   describe('"listenerCount" method', () => {
     test('should always return 0 for an event without listeners', () => {
-      expect(emitter.listenerCount(getRandomEventName()))
-        .toBe(0);
+      expect(emitter.listenerCount(getRandomEventName())).toBe(0);
     });
   });
 
@@ -189,8 +192,9 @@ describe('MyEventEmitter', () => {
 
       emitter.emit(eventName);
 
-      expect(callback1.mock.invocationCallOrder[0])
-        .toBeLessThan(callback2.mock.invocationCallOrder[0]);
+      expect(callback1.mock.invocationCallOrder[0]).toBeLessThan(
+        callback2.mock.invocationCallOrder[0],
+      );
     });
 
     test('should not affect callbacks added for other events', () => {
@@ -283,8 +287,9 @@ describe('MyEventEmitter', () => {
 
       emitter.emit(eventName);
 
-      expect(callback1.mock.invocationCallOrder[0])
-        .toBeLessThan(callback2.mock.invocationCallOrder[0]);
+      expect(callback1.mock.invocationCallOrder[0]).toBeLessThan(
+        callback2.mock.invocationCallOrder[0],
+      );
     });
 
     test('should not affect one-time listeners for other events with same callback', () => {
@@ -314,8 +319,9 @@ describe('MyEventEmitter', () => {
 
       expect(emitter.listenerCount(eventName)).toBe(2);
 
-      expect(callback2.mock.invocationCallOrder[0])
-        .toBeLessThan(callback1.mock.invocationCallOrder[0]);
+      expect(callback2.mock.invocationCallOrder[0]).toBeLessThan(
+        callback1.mock.invocationCallOrder[0],
+      );
     });
 
     test('should add multiple listeners at the beginning of the listeners array for a given event in order of registration', () => {
@@ -331,11 +337,13 @@ describe('MyEventEmitter', () => {
 
       expect(emitter.listenerCount(eventName)).toBe(3);
 
-      expect(callback3.mock.invocationCallOrder[0])
-        .toBeLessThan(callback2.mock.invocationCallOrder[0]);
+      expect(callback3.mock.invocationCallOrder[0]).toBeLessThan(
+        callback2.mock.invocationCallOrder[0],
+      );
 
-      expect(callback2.mock.invocationCallOrder[0])
-        .toBeLessThan(callback1.mock.invocationCallOrder[0]);
+      expect(callback2.mock.invocationCallOrder[0]).toBeLessThan(
+        callback1.mock.invocationCallOrder[0],
+      );
     });
   });
 
@@ -354,8 +362,9 @@ describe('MyEventEmitter', () => {
       expect(callback1).toHaveBeenCalledTimes(2);
       expect(callback2).toHaveBeenCalledTimes(1);
 
-      expect(callback2.mock.invocationCallOrder[0])
-        .toBeLessThan(callback1.mock.invocationCallOrder[0]);
+      expect(callback2.mock.invocationCallOrder[0]).toBeLessThan(
+        callback1.mock.invocationCallOrder[0],
+      );
 
       expect(emitter.listenerCount(eventName)).toBe(1);
     });
@@ -377,11 +386,13 @@ describe('MyEventEmitter', () => {
       expect(callback2).toHaveBeenCalledTimes(1);
       expect(callback3).toHaveBeenCalledTimes(1);
 
-      expect(callback3.mock.invocationCallOrder[0])
-        .toBeLessThan(callback2.mock.invocationCallOrder[0]);
+      expect(callback3.mock.invocationCallOrder[0]).toBeLessThan(
+        callback2.mock.invocationCallOrder[0],
+      );
 
-      expect(callback2.mock.invocationCallOrder[0])
-        .toBeLessThan(callback1.mock.invocationCallOrder[0]);
+      expect(callback2.mock.invocationCallOrder[0]).toBeLessThan(
+        callback1.mock.invocationCallOrder[0],
+      );
 
       expect(emitter.listenerCount(eventName)).toBe(1);
     });
@@ -401,7 +412,7 @@ describe('MyEventEmitter', () => {
       expect(emitter.listenerCount(eventName)).toBe(0);
     });
 
-    test('should remove a listener by reference for a given event and don\'t affect other events', () => {
+    test("should remove a listener by reference for a given event and don't affect other events", () => {
       const eventName = getRandomEventName();
       const callback1 = jest.fn();
       const callback2 = jest.fn();
@@ -416,7 +427,7 @@ describe('MyEventEmitter', () => {
       expect(emitter.listenerCount(eventName)).toBe(1);
     });
 
-    test('should remove a listener by reference for a given event and don\'t affect other events with same callback', () => {
+    test("should remove a listener by reference for a given event and don't affect other events with same callback", () => {
       const eventName1 = getRandomEventName();
       const eventName2 = getRandomEventName();
       const callback = jest.fn();
@@ -450,7 +461,7 @@ describe('MyEventEmitter', () => {
       expect(emitter.listenerCount(eventName)).toBe(0);
     });
 
-    test('should remove all listeners for a given event and don\'t affect other events', () => {
+    test("should remove all listeners for a given event and don't affect other events", () => {
       const eventName1 = getRandomEventName();
       const eventName2 = getRandomEventName();
       const callback1 = jest.fn();
@@ -468,7 +479,7 @@ describe('MyEventEmitter', () => {
       expect(emitter.listenerCount(eventName2)).toBe(1);
     });
 
-    test('should remove all listeners for a given event and don\'t affect other events with same callback', () => {
+    test("should remove all listeners for a given event and don't affect other events with same callback", () => {
       const eventName1 = getRandomEventName();
       const eventName2 = getRandomEventName();
       const callback = jest.fn();
