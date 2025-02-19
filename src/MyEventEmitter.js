@@ -41,6 +41,9 @@ class MyEventEmitter {
   }
 
   prependListener(event, listener) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
     this.events[event].unshift(listener);
   }
 
