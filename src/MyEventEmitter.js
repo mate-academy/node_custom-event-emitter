@@ -1,15 +1,5 @@
 'use strict';
 
-// const listenerListType = {
-//   listenerName: 'name',
-//   list: [
-//     {
-//       callback: () => {},
-//       type: 'on',
-//     },
-//   ],
-// };
-
 class MyEventEmitter {
   constructor() {
     this.listeners = [];
@@ -65,22 +55,31 @@ class MyEventEmitter {
       ],
     });
   }
-  off(listenerName) {
-    this.listeners = this.listeners.filter(
-      (listener) => listener.listenerName !== listenerName,
-    );
+  off(listenerName, callFunction) {
+    this.listeners = this.listeners
+      .map((listener) => {
+        if (listener.listenerName === listenerName) {
+          return {
+            ...listener,
+            list: listener.list.filter(
+              (callback) => callback.callFunction !== callFunction,
+            ),
+          };
+        }
+
+        return listener;
+      })
+      .filter((listener) => listener.list.length > 0);
   }
   emit(listenerName, ...args) {
     for (const listener of this.listeners) {
       if (listener.listenerName === listenerName) {
-        for (const listenerCallback of listener.list) {
-          listenerCallback.callFunction(...args);
-        }
-      }
+        listener.list = listener.list.filter((callback) => {
+          callback.callFunction(...args);
 
-      listener.list = listener.list.filter(
-        (callback) => callback.type !== 'once',
-      );
+          return callback.type !== 'once';
+        });
+      }
     }
   }
   prependListener(listenerName, callFunction) {
@@ -133,17 +132,12 @@ class MyEventEmitter {
   }
 
   removeAllListeners(listenerName) {
-    this.listeners.filter((listener) => listener.listenerName !== listenerName);
+    this.listeners = this.listeners.filter(
+      (listener) => listener.listenerName !== listenerName,
+    );
   }
 
   listenerCount(listenerName) {
-    // console.log('listenerCount', listenerName);
-
-    // console.log(
-    //   this.listeners.find((listener) => listener.listenerName === listenerName)
-    //     ?.list.length ?? 0,
-    // );
-
     return (
       this.listeners.find((listener) => listener.listenerName === listenerName)
         ?.list.length ?? 0
@@ -152,35 +146,3 @@ class MyEventEmitter {
 }
 
 module.exports = MyEventEmitter;
-
-const customEmitter = new MyEventEmitter();
-
-// customEmitter.once('kek', (...args) => {
-//   console.log(`ebalo ${args} once`);
-// });
-
-// customEmitter.once('kek', (...args) => {
-//   console.log(`ebalo ${args} 2`);
-// });
-
-// customEmitter.once('kek', (...args) => {
-//   console.log(`ebalo ${args} 3`);
-// });
-
-// customEmitter.on('kek', () => {
-//   console.log('kek1');
-// });
-
-// customEmitter.on('kek', () => {
-//   console.log('kek2');
-// });
-
-// customEmitter.on('kek', () => {
-//   console.log('kek3');
-// });
-
-customEmitter.emit('kek', 'ebalo', '2');
-customEmitter.emit('kek', 'ebalo', '2');
-customEmitter.emit('kek', 'ebalo', '2');
-customEmitter.listenerCount('kek');
-// customEmitter.emit('kek', 'ebalo', '2');
