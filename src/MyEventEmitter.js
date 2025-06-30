@@ -57,7 +57,7 @@ class MyEventEmitter {
 
   removeAllListeners(event) {
     if (event) {
-      delete this.events[event];
+      this.events[event] = [];
     } else {
       this.events = {};
   }
