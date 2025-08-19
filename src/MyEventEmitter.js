@@ -1,72 +1,65 @@
 'use strict';
 
-class MyeventsEmitter {
-  constructor() {
-    this.events = new Map();
+class MyEventEmitter {
+  constructor(name) {
+    this.name = name;
+    this.events = {};
+  }
+  on(event, listener) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(listener);
   }
 
-  on(events, listener) {
-    const listeners = this.events.get(events) || [];
-
-    listeners.push(listener);
-    this.events.set(events, listeners);
-  }
-  once(events, listener) {
-    const wrapper = (...args) => {
-      listener(...args);
-      this.off(events, wrapper);
+  once(event, listener) {
+    const start = (...arg) => {
+      listener(...arg);
+      this.off(event, start);
     };
 
-    this.on(events, wrapper);
+    this.on(event, start);
   }
-  off(events, listener) {
-    const listeners = this.events.get(events);
+  off(event, listener) {
+    if (this.events[event]) {
+      this.events[event] = this.events[event].filter((fn) => fn !== listener);
+    }
+  }
+  emit(event, ...arg) {
+    if (this.events[event]) {
+      for (const ev of this.events[event]) {
+        ev(...arg);
+      }
+    }
+  }
+  prependListener(event, listener) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].unshift(listener);
+  }
+  prependOnceListener(event, listener) {
+    const start = (...arg) => {
+      listener(...arg);
+      this.off(event, start);
+    };
 
-    const index = listeners.indexOf(listener);
-
-    listeners.splice(index, 1);
-
-    if (listeners.length === 0) {
-      this.events.delete(events);
+    this.prependListener(event, start);
+  }
+  removeAllListeners(event) {
+    if (!event) {
+      this.events = {};
     } else {
-      this.events.set(events, listeners);
+      this.events[event] = [];
     }
   }
-  emit(events, ...args) {
-    const listeners = [...this.events.get(events)];
-
-    listeners.forEach((listener) => {
-      listener(...args);
-    });
-  }
-  prependListener(events, listener) {
-    const listeners = [listener, ...(this.events.get(events) || [])];
-
-    this.events.set(events, listeners);
-  }
-  prependOnceListener(events, listener) {
-    const self = this;
-
-    function wrapper(...args) {
-      listener(...args);
-
-      self.off(events, wrapper);
-    }
-
-    this.prependListener(events, wrapper);
-  }
-  removeAllListeners(events) {
-    if (!events) {
-      this.events.clear();
+  listenerCount(event) {
+    if (this.events[event]) {
+      return this.events[event].length;
     } else {
-      this.events.delete(events);
+      return 0;
     }
-  }
-  listenerCount(events) {
-    const listeners = this.events.get(events) || [];
-
-    return listeners.length;
   }
 }
 
-module.exports = MyeventsEmitter;
+module.exports = MyEventEmitter;
