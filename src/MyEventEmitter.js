@@ -6,6 +6,10 @@ class MyEventEmitter {
   }
 
   on(eventName, listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('Listener must be a function');
+    }
+
     if (!this.events[eventName]) {
       this.events[eventName] = [];
     }
@@ -15,6 +19,10 @@ class MyEventEmitter {
   }
 
   once(eventName, listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('Listener must be a function');
+    }
+
     const onceWrapper = (...args) => {
       this.off(eventName, onceWrapper);
       listener(...args);
@@ -26,6 +34,10 @@ class MyEventEmitter {
   }
 
   off(eventName, listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('Listener must be a function');
+    }
+
     if (!this.events[eventName]) {
       return this;
     }
@@ -46,12 +58,21 @@ class MyEventEmitter {
       return false;
     }
 
-    for (const listener of this.events[eventName]) {
+    const toCall = this.events[eventName].slice();
+
+    for (const listener of toCall) {
       listener(...args);
     }
+
+    return true;
   }
 
   prependListener(eventName, listener) {
+    if (typeof listener !== 'function') {
+
+      throw new TypeError('Listener must be a function');
+    }
+
     if (!this.events[eventName]) {
       this.events[eventName] = [];
     }
@@ -61,6 +82,11 @@ class MyEventEmitter {
   }
 
   prependOnceListener(eventName, listener) {
+    if (typeof listener !== 'function') {
+
+      throw new TypeError('Listener must be a function');
+    }
+
     const onceWrapper = (...args) => {
       this.off(eventName, onceWrapper);
       listener(...args);
