@@ -88,13 +88,15 @@ class MyEventEmitter {
     const wrapper = (...args) => {
       listener.apply(this, args);
 
-      const filteredEvents = this.events[event].filter((ev) => ev !== wrapper);
+      const filteredEvents = this.events[event].filter(
+        (ev) => ev !== listener && ev !== wrapper,
+      );
 
       this.events[event] = filteredEvents;
-
-      return this;
+      this.onceMap.delete(listener);
     };
 
+    this.onceMap.set(listener, wrapper);
     this.events[event].unshift(wrapper);
 
     return this;
