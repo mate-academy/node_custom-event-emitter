@@ -2,34 +2,36 @@
 
 class MyEventEmitter {
   listeners = [];
+  nextId = 0;
 
   on(eventName, listener) {
-    this.listeners.push([eventName, listener, false, this.listeners.length]);
+    this.listeners.push([eventName, listener, false, this.nextId++]);
 
     return this;
   }
   once(eventName, listener) {
-    this.listeners.push([eventName, listener, true, this.listeners.length]);
+    this.listeners.push([eventName, listener, true, this.nextId++]);
 
     return this;
   }
   off(eventName, listener) {
-    this.listeners.splice(
-      this.listeners.findIndex(
-        ([name, curListener]) =>
-          name === eventName && curListener.toString() === listener.toString(),
-      ),
-      1,
+    const index = this.listeners.findIndex(
+      ([name, curListener]) => name === eventName && curListener === listener,
     );
+
+    if (index >= 0) {
+      this.listeners.splice(index, 1);
+    }
 
     return this;
   }
   emit(eventName, ...args) {
+    const snapshot = this.listeners.slice();
     const onceListeners = [];
     let foundListener = false;
 
-    for (let i = 0; i < this.listeners.length; i++) {
-      const [name, listener, isOnce, id] = this.listeners[i];
+    for (let i = 0; i < snapshot.length; i++) {
+      const [name, listener, isOnce, id] = snapshot[i];
 
       if (name === eventName) {
         listener(...args);
@@ -48,17 +50,21 @@ class MyEventEmitter {
     return foundListener;
   }
   prependListener(eventName, listener) {
-    this.listeners.unshift([eventName, listener, false, this.listeners.length]);
+    this.listeners.unshift([eventName, listener, false, this.nextId++]);
 
     return this;
   }
   prependOnceListener(eventName, listener) {
-    this.listeners.unshift([eventName, listener, true, this.listeners.length]);
+    this.listeners.unshift([eventName, listener, true, this.nextId++]);
 
     return this;
   }
   removeAllListeners(eventName) {
-    this.listeners = this.listeners.filter(([name]) => name !== eventName);
+    if (eventName) {
+      this.listeners = this.listeners.filter(([name]) => name !== eventName);
+    } else {
+      this.listeners = [];
+    }
 
     return this;
   }
