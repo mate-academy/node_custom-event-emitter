@@ -41,7 +41,7 @@ class MyEventEmitter {
     }
 
     this.listeners[eventName] = this.listeners[eventName].filter(
-      (listen) => listen !== listener && listen._original !== listen,
+      (listen) => listen !== listener && listen._original !== listener,
     );
 
     if (this.listeners[eventName].length === 0) {
