@@ -19,11 +19,17 @@ class MyEventEmitter {
     return this;
   }
   once(eventName, listener) {
-    const wrapper = function (...args) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('Listener must be a function');
+    }
+
+    const wrapper = (...args) => {
       listener.apply(this, args);
 
       this.off(eventName, wrapper);
-    }.bind(this);
+    };
+
+    wrapper._original = listener;
 
     this.on(eventName, wrapper);
 
@@ -35,31 +41,53 @@ class MyEventEmitter {
     }
 
     this.listeners[eventName] = this.listeners[eventName].filter(
-      (listen) => listen !== listener,
+      (listen) => listen !== listener && listen._original !== listen,
     );
+
+    if (this.listeners[eventName].length === 0) {
+      delete this.listeners[eventName];
+    }
 
     return this;
   }
   emit(eventName, ...args) {
-    if (!this.listeners[eventName]) {
+    const list = this.listeners[eventName];
+
+    if (!list || list.length === 0) {
       return false;
     }
 
-    this.listeners[eventName].forEach((func) => func(...args));
+    for (const fn of list.slice()) {
+      fn(...args);
+    }
 
     return true;
   }
   prependListener(eventName, listener) {
-    this.listeners[eventName] = [listener, ...this.listeners[eventName]];
+    if (typeof listener !== 'function') {
+      throw new Error('Listener must be a function');
+    }
+
+    if (!this.listeners[eventName]) {
+      this.listeners[eventName] = [];
+    }
+
+    this.listeners[eventName].unshift(listener);
 
     return this;
   }
   prependOnceListener(eventName, listener) {
-    const wrapper = function (...args) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('Listener must be a function');
+    }
+
+    const wrapper = (...args) => {
       listener.apply(this, args);
 
       this.off(eventName, wrapper);
-    }.bind(this);
+    };
+
+    wrapper._original = listener;
 
     this.prependListener(eventName, wrapper);
 
@@ -71,6 +99,8 @@ class MyEventEmitter {
     } else {
       delete this.listeners[eventName];
     }
+
+    return this;
   }
   listenerCount(eventName) {
     return this.listeners[eventName] ? this.listeners[eventName].length : 0;
