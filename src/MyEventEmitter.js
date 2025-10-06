@@ -21,8 +21,8 @@ class MyEventEmitter {
   }
 
   on(name, callback) {
-    checkIfEmpty(name, this.listeners);
     checkArguments(name, callback);
+    checkIfEmpty(name, this.listeners);
 
     this.listeners[name].push(callback);
 
@@ -30,8 +30,8 @@ class MyEventEmitter {
   }
 
   once(name, callback) {
-    checkIfEmpty(name, this.listeners);
     checkArguments(name, callback);
+    checkIfEmpty(name, this.listeners);
 
     const wrapper = (...args) => {
       callback(...args);
@@ -45,11 +45,15 @@ class MyEventEmitter {
   }
 
   off(name, callback) {
-    checkIfEmpty(name, this.listeners);
     checkArguments(name, callback);
+    checkIfEmpty(name, this.listeners);
+
+    if (!this.listeners[name]) {
+      return;
+    }
 
     this.listeners[name] = this.listeners[name].filter(
-      (x) => x !== callback || x.original === callback,
+      (x) => x !== callback && x.original !== callback,
     );
 
     return this;
@@ -60,18 +64,14 @@ class MyEventEmitter {
 
     const toCall = this.listeners[name]?.slice() || [];
 
-    if (!this.listeners[name]) {
-      return;
-    }
-
     for (const listener of toCall) {
       listener(...args);
     }
   }
 
   prependListener(name, callback) {
-    checkIfEmpty(name, this.listeners);
     checkArguments(name, callback);
+    checkIfEmpty(name, this.listeners);
 
     this.listeners[name].unshift(callback);
 
@@ -79,8 +79,8 @@ class MyEventEmitter {
   }
 
   prependOnceListener(name, callback) {
-    checkIfEmpty(name, this.listeners);
     checkArguments(name, callback);
+    checkIfEmpty(name, this.listeners);
 
     const wrapper = (...args) => {
       callback(...args);
@@ -94,7 +94,7 @@ class MyEventEmitter {
   }
 
   removeAllListeners(name) {
-    if (!name) {
+    if (typeof name === 'undefined') {
       this.listeners = {};
     } else {
       this.listeners[name] = [];
