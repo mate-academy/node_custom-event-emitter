@@ -7,7 +7,10 @@ function checkIfEmpty(name, listeners) {
 }
 
 function checkArguments(name, callback) {
-  if (typeof name !== 'string' || typeof callback !== 'function') {
+  if (
+    (typeof name !== 'string' && typeof name !== 'symbol') ||
+    typeof callback !== 'function'
+  ) {
     throw new Error('Invalid arguments!');
   }
 }
@@ -35,6 +38,7 @@ class MyEventEmitter {
       this.off(name, wrapper);
     };
 
+    wrapper.original = callback;
     this.listeners[name].push(wrapper);
 
     return this;
@@ -43,7 +47,10 @@ class MyEventEmitter {
   off(name, callback) {
     checkIfEmpty(name, this.listeners);
     checkArguments(name, callback);
-    this.listeners[name] = this.listeners[name].filter((x) => x !== callback);
+
+    this.listeners[name] = this.listeners[name].filter(
+      (x) => x !== callback || x.original === callback,
+    );
 
     return this;
   }
@@ -51,11 +58,13 @@ class MyEventEmitter {
   emit(name, ...args) {
     checkArguments(name, () => {});
 
+    const toCall = this.listeners[name]?.slice() || [];
+
     if (!this.listeners[name]) {
       return;
     }
 
-    for (const listener of this.listeners[name]) {
+    for (const listener of toCall) {
       listener(...args);
     }
   }
@@ -65,6 +74,8 @@ class MyEventEmitter {
     checkArguments(name, callback);
 
     this.listeners[name].unshift(callback);
+
+    return this;
   }
 
   prependOnceListener(name, callback) {
@@ -76,13 +87,18 @@ class MyEventEmitter {
       this.off(name, wrapper);
     };
 
+    wrapper.original = callback;
     this.listeners[name].unshift(wrapper);
 
     return this;
   }
 
   removeAllListeners(name) {
-    this.listeners[name] = [];
+    if (!name) {
+      this.listeners = {};
+    } else {
+      this.listeners[name] = [];
+    }
 
     return this;
   }
