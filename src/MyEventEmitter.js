@@ -18,6 +18,8 @@ class MyEventEmitter {
       listener(...args);
     };
 
+    wrapper.originalListener = listener;
+
     this.on(eventName, wrapper);
   }
   off(eventName, listener) {
@@ -26,7 +28,7 @@ class MyEventEmitter {
     }
 
     this.events[eventName] = this.events[eventName].filter(
-      (fn) => fn !== listener,
+      (fn) => fn !== listener && fn.originalListener !== listener,
     );
 
     if (this.events[eventName].length === 0) {
@@ -58,9 +60,11 @@ class MyEventEmitter {
   }
   prependOnceListener(eventName, listener) {
     const wrapper = (...args) => {
-      listener(...args);
       this.off(eventName, wrapper);
+      listener(...args);
     };
+
+    wrapper.originalListener = listener;
 
     if (!this.events[eventName]) {
       this.events[eventName] = [];
