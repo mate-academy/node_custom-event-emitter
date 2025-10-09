@@ -14,8 +14,8 @@ class MyEventEmitter {
   }
   once(eventName, listener) {
     const wrapper = (...args) => {
-      listener(...args);
       this.off(eventName, wrapper);
+      listener(...args);
     };
 
     this.on(eventName, wrapper);
@@ -28,9 +28,15 @@ class MyEventEmitter {
     this.events[eventName] = this.events[eventName].filter(
       (fn) => fn !== listener,
     );
+
+    if (this.events[eventName].length === 0) {
+      delete this.events[eventName];
+    }
   }
   emit(eventName, ...args) {
-    const listeners = this.events[eventName];
+    const listeners = this.events[eventName]
+      ? this.events[eventName].slice()
+      : [];
 
     if (!listeners || listeners.length === 0) {
       return false;
@@ -62,14 +68,14 @@ class MyEventEmitter {
 
     this.events[eventName].unshift(wrapper);
   }
-  removeAllListeners(eventName, listener) {
+  removeAllListeners(eventName) {
     if (eventName) {
       delete this.events[eventName];
     } else {
       this.events = {};
     }
   }
-  listenerCount(eventName, listener) {
+  listenerCount(eventName) {
     if (!this.events[eventName]) {
       return 0;
     }
