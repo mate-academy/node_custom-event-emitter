@@ -45,7 +45,7 @@ class MyEventEmitter {
 
   emit(event, ...args) {
     const callbacksToCall = this.listenersMap.get(event);
-    const onceCallbacksForEvent = this.onceListenersMap.get(event) || [];
+    let onceCallbacksForEvent = this.onceListenersMap.get(event) || [];
 
     if (!callbacksToCall || !callbacksToCall.length) {
       return;
@@ -58,10 +58,14 @@ class MyEventEmitter {
     for (const cal of callbacksToCall) {
       if (onceCallbacksForEvent.includes(cal)) {
         this.off(event, cal);
+
+        onceCallbacksForEvent = onceCallbacksForEvent.filter(
+          (calOnce) => calOnce !== cal,
+        );
       }
     }
 
-    this.onceListenersMap.set(event, []);
+    this.onceListenersMap.set(event, onceCallbacksForEvent);
   }
 
   prependListener(event, callback) {
@@ -72,6 +76,7 @@ class MyEventEmitter {
     }
 
     updatedCallbacksArray.unshift(callback);
+    this.listenersMap.set(event, updatedCallbacksArray);
   }
 
   prependOnceListener(event, callback) {
@@ -90,11 +95,13 @@ class MyEventEmitter {
   removeAllListeners(event) {
     if (!event) {
       this.listenersMap.clear();
+      this.onceListenersMap.clear();
 
       return;
     }
 
     this.listenersMap.delete(event);
+    this.onceListenersMap.delete(event);
   }
 
   listenerCount(event) {
