@@ -27,8 +27,6 @@ class MyEventEmitter {
     if (!this.events[eventName]) {
     } else {
       if (listener === undefined) {
-        this.events[eventName] = [];
-
         return;
       }
 
@@ -53,7 +51,7 @@ class MyEventEmitter {
 
         if (object.once === true) {
           this.events[eventName] = this.events[eventName].filter(
-            (elem) => elem.once !== true,
+            (elem) => elem !== object,
           );
         }
       }
