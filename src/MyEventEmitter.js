@@ -36,7 +36,10 @@ class MyEventEmitter {
 
     this.events.set(
       eventName,
-      listeners.filter((eventListener) => eventListener !== listener),
+      listeners.filter(
+        (eventListener) =>
+          eventListener !== listener && eventListener.listener !== listener,
+      ),
     );
 
     return this;
