@@ -27,10 +27,7 @@ class MyEventEmitter {
       return;
     }
 
-    this.listeners.set(
-      event,
-      this.listeners.get(event).filter((l) => l !== fn),
-    );
+    this.listeners.get(event).splice(this.listeners.get(event).indexOf(fn), 1);
   }
 
   emit(event, ...payload) {
@@ -38,27 +35,27 @@ class MyEventEmitter {
       return;
     }
 
-    const listeners = this.listeners.get(event);
+    const listeners = [...this.listeners.get(event)];
 
     listeners.forEach((fn) => fn(...payload));
   }
 
-  prependListener(event, ...listeners) {
+  prependListener(event, listener) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
 
     const current = this.listeners.get(event);
 
-    this.listeners.set(event, [...listeners, ...current]);
+    this.listeners.set(event, [listener, ...current]);
 
     return this;
   }
 
   prependOnceListener(eventName, listener) {
     const wrapper = (...args) => {
-      this.off(eventName, wrapper);
       listener(...args);
+      this.off(eventName, wrapper);
     };
 
     wrapper.listener = listener;
