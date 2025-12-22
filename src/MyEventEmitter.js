@@ -19,6 +19,7 @@ class MyEventEmitter {
       this.off(event, wrapper);
     };
 
+    wrapper.listener = listener;
     this.on(event, wrapper);
   }
 
@@ -27,7 +28,12 @@ class MyEventEmitter {
       return;
     }
 
-    this.listeners.get(event).splice(this.listeners.get(event).indexOf(fn), 1);
+    const listeners = this.listeners.get(event);
+    const index = listeners.indexOf(fn);
+
+    if (index !== -1) {
+      listeners.splice(index, 1);
+    }
   }
 
   emit(event, ...payload) {
