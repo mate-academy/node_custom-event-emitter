@@ -224,6 +224,22 @@ describe('MyEventEmitter', () => {
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
+
+    test('should return true if listeners were called and false otherwise', () => {
+      const eventName = getRandomEventName();
+      const resultEmpty = emitter.emit(eventName);
+
+      expect(resultEmpty).toBe(false);
+
+      // Case 2: With listeners
+      const callback = jest.fn();
+
+      emitter.on(eventName, callback);
+
+      const resultWithListener = emitter.emit(eventName);
+
+      expect(resultWithListener).toBe(true);
+    });
   });
 
   describe('"once" method', () => {
@@ -443,6 +459,21 @@ describe('MyEventEmitter', () => {
       expect(emitter.listenerCount(eventName1)).toBe(0);
       expect(emitter.listenerCount(eventName2)).toBe(1);
     });
+
+    // --- NEW TEST 2 ADDED HERE ---
+    test('should not throw error or affect others when removing non-existent listener', () => {
+      const eventName = getRandomEventName();
+      const realCallback = jest.fn();
+      const fakeCallback = jest.fn();
+
+      emitter.on(eventName, realCallback);
+
+      expect(() => {
+        emitter.off(eventName, fakeCallback);
+      }).not.toThrow();
+
+      expect(emitter.listenerCount(eventName)).toBe(1);
+    });
   });
 
   describe('"removeAllListeners" method', () => {
@@ -494,6 +525,23 @@ describe('MyEventEmitter', () => {
 
       expect(emitter.listenerCount(eventName1)).toBe(0);
       expect(emitter.listenerCount(eventName2)).toBe(1);
+    });
+
+    // --- NEW TEST 3 ADDED HERE ---
+    test('should remove all listeners for ALL events if no argument is provided', () => {
+      const eventName1 = getRandomEventName();
+      const eventName2 = getRandomEventName();
+      const callback1 = jest.fn();
+      const callback2 = jest.fn();
+
+      emitter.on(eventName1, callback1);
+      emitter.on(eventName2, callback2);
+
+      // Call without arguments
+      emitter.removeAllListeners();
+
+      expect(emitter.listenerCount(eventName1)).toBe(0);
+      expect(emitter.listenerCount(eventName2)).toBe(0);
     });
   });
 });

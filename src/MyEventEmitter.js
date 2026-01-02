@@ -53,7 +53,6 @@ class MyEventEmitter {
       listener(...args);
     });
 
-    // Return true if listeners were called
     return true;
   }
 
@@ -79,12 +78,9 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
-    // Requirement: "removeAllListeners() without arguments"
     if (eventName) {
-      // If argument provided, delete just that one
       delete this.events[eventName];
     } else {
-      // If NO argument, wipe everything
       this.events = {};
     }
 
