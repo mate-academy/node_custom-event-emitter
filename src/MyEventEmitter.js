@@ -45,7 +45,7 @@ class MyEventEmitter {
     const listeners = this._events[eventName];
 
     if (!listeners) {
-      return this;
+      return false;
     }
 
     const listenersCopy = [...listeners];
