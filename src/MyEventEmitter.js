@@ -35,7 +35,7 @@ class MyEventEmitter {
       return;
     }
 
-    this.events[eventName].forEach((cb) => cb(...args));
+    this.events[eventName].slice().forEach((cb) => cb(...args));
   }
 
   prependListener(eventName, handler) {
@@ -56,6 +56,12 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
+    if (!eventName) {
+      this.events = {};
+
+      return;
+    }
+
     delete this.events[eventName];
   }
 
