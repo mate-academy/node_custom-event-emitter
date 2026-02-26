@@ -60,7 +60,7 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
-    if (!eventName) {
+    if (eventName === undefined) {
       this.events = {};
     }
 
