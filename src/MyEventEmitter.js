@@ -37,7 +37,7 @@ class MyEventEmitter {
       return;
     }
 
-    this.events[eventName].forEach((listener) => {
+    [...this.events[eventName]].forEach((listener) => {
       listener(...args);
     });
   }
