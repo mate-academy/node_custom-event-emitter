@@ -38,9 +38,13 @@ class MyEventEmitter {
       return false;
     }
 
-    this.events[eventName].forEach((listener) => {
+    const listenersToCall = [...this.events[eventName]];
+
+    listenersToCall.forEach((listener) => {
       listener(...args);
     });
+
+    return true;
   }
   prependListener(eventName, listener) {
     const hasEvent = this.events[eventName];
