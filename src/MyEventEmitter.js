@@ -38,15 +38,12 @@ class MyEventEmitter {
       return this;
     }
 
-    const index = listeners.indexOf(listener);
+    const index = listeners.findIndex(
+      (l) => l === listener || l.originalListener === listener,
+    );
 
     if (index !== -1) {
       listeners.splice(index, 1);
-    }
-
-    // Очищаємо об'єкт, якщо слухачів більше немає
-    if (listeners.length === 0) {
-      delete this._events[eventName];
     }
 
     return this;
