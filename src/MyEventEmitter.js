@@ -28,6 +28,12 @@ class MyEventEmitter {
   }
 
   off(event, listener) {
+    const listeners = this.events[event];
+
+    if (!listeners || !listeners.length) {
+      return this;
+    }
+
     this.events[event] = this.events[event].filter(
       ({ listener: lis }) => lis !== listener,
     );
