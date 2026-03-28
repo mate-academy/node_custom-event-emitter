@@ -1,14 +1,57 @@
 'use strict';
 
 class MyEventEmitter {
-  on() {}
-  once() {}
-  off() {}
-  emit() {}
-  prependListener() {}
-  prependOnceListener() {}
-  removeAllListeners() {}
-  listenerCount() {}
+  constructor() {
+    this.listeners = [];
+  }
+  on(event, listener) {
+    this.listeners.push({ event, listener });
+  }
+  once(event, listener) {
+    const onceListener = (...data) => {
+      listener(...data);
+      this.off(event, onceListener);
+    };
+
+    this.on(event, onceListener);
+  }
+  off(event, listener) {
+    const index = this.listeners.findIndex(
+      (l) => l.event === event && l.listener === listener,
+    );
+
+    if (index !== -1) {
+      this.listeners.splice(index, 1);
+    }
+  }
+  emit(event, ...data) {
+    this.listeners.slice().forEach((l) => {
+      if (l.event === event) {
+        l.listener(...data);
+      }
+    });
+  }
+  prependListener(event, listener) {
+    this.listeners.unshift({ event, listener });
+  }
+  prependOnceListener(event, listener) {
+    const onceListener = (...data) => {
+      listener(...data);
+      this.off(event, onceListener);
+    };
+
+    this.prependListener(event, onceListener);
+  }
+  removeAllListeners(event) {
+    if (event) {
+      this.listeners = this.listeners.filter((l) => l.event !== event);
+    } else {
+      this.listeners = [];
+    }
+  }
+  listenerCount(event) {
+    return this.listeners.filter((l) => l.event === event).length;
+  }
 }
 
 module.exports = MyEventEmitter;
