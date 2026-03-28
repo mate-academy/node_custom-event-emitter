@@ -16,12 +16,16 @@ class MyEventEmitter {
     this.on(event, onceListener);
   }
   off(event, listener) {
-    this.listeners = this.listeners.filter(
-      (l) => l.event !== event || l.listener !== listener,
+    const index = this.listeners.findIndex(
+      (l) => l.event === event && l.listener === listener,
     );
+
+    if (index !== -1) {
+      this.listeners.splice(index, 1);
+    }
   }
   emit(event, ...data) {
-    this.listeners.forEach((l) => {
+    this.listeners.slice().forEach((l) => {
       if (l.event === event) {
         l.listener(...data);
       }
