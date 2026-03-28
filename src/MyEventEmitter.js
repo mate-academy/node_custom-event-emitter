@@ -8,8 +8,8 @@ class MyEventEmitter {
     this.listeners.push({ event, listener });
   }
   once(event, listener) {
-    const onceListener = (data) => {
-      listener(data);
+    const onceListener = (...data) => {
+      listener(...data);
       this.off(event, onceListener);
     };
 
@@ -31,15 +31,19 @@ class MyEventEmitter {
     this.listeners.unshift({ event, listener });
   }
   prependOnceListener(event, listener) {
-    const onceListener = (data) => {
-      listener(data);
+    const onceListener = (...data) => {
+      listener(...data);
       this.off(event, onceListener);
     };
 
     this.prependListener(event, onceListener);
   }
   removeAllListeners(event) {
-    this.listeners = this.listeners.filter((l) => l.event !== event);
+    if (event) {
+      this.listeners = this.listeners.filter((l) => l.event !== event);
+    } else {
+      this.listeners = [];
+    }
   }
   listenerCount(event) {
     return this.listeners.filter((l) => l.event === event).length;
