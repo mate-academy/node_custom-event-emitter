@@ -11,6 +11,8 @@ class MyEventEmitter {
     }
 
     this.events[event].push(listener);
+
+    return this;
   }
 
   once(event, listener) {
@@ -22,26 +24,32 @@ class MyEventEmitter {
     wrapper.listener = listener;
 
     this.on(event, wrapper);
+
+    return this;
   }
 
   off(event, listener) {
     if (!this.events[event]) {
-      return;
+      return this;
     }
 
     this.events[event] = this.events[event].filter((l) => {
       return l !== listener && l.listener !== listener;
     });
+
+    return this;
   }
 
   emit(event, ...args) {
     if (!this.events[event]) {
-      return;
+      return false;
     }
 
     [...this.events[event]].forEach((listener) => {
       listener(...args);
     });
+
+    return true;
   }
 
   prependListener(event, listener) {
@@ -50,6 +58,8 @@ class MyEventEmitter {
     }
 
     this.events[event].unshift(listener);
+
+    return this;
   }
 
   prependOnceListener(event, listener) {
@@ -61,14 +71,20 @@ class MyEventEmitter {
     wrapper.listener = listener;
 
     this.prependListener(event, wrapper);
+
+    return this;
   }
 
   removeAllListeners(event) {
     if (event) {
-      this.events[event] = [];
+      if (this.events[event]) {
+        delete this.events[event];
+      }
     } else {
       this.events = {};
     }
+
+    return this;
   }
 
   listenerCount(event) {
