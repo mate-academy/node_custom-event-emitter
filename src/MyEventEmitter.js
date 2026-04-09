@@ -32,9 +32,11 @@ class MyEventEmitter {
       return;
     }
 
-    this.events[event].forEach((listener) => {
+    const listeners = [...this.events[event]];
+
+    for (const listener of listeners) {
       listener(...args);
-    });
+    }
   }
   prependListener(event, listener) {
     if (!this.events[event]) {
