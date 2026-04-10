@@ -10,9 +10,11 @@ class MyEventEmitter {
 
     if (prepend) {
       this.events.get(eventName).unshift(listener);
-    } else {
-      this.events.get(eventName).push(listener);
+
+      return;
     }
+
+    this.events.get(eventName).push(listener);
   }
 
   once(eventName, listener, prepend = false) {
@@ -60,6 +62,8 @@ class MyEventEmitter {
   removeAllListeners(eventName) {
     if (!eventName) {
       this.events.clear();
+
+      return;
     }
 
     this.events.delete(eventName);
