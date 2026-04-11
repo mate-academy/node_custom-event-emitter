@@ -20,7 +20,7 @@ class MyEventEmitter {
   once(eventName, listener, prepend = false) {
     const onceWrapper = (...args) => {
       this.off(eventName, onceWrapper);
-      listener(...args);
+      listener.apply(this, args);
     };
 
     this.on(eventName, onceWrapper, prepend);
@@ -33,10 +33,13 @@ class MyEventEmitter {
       return;
     }
 
-    this.events.set(
-      eventName,
-      listeners.filter((el) => el !== listener),
-    );
+    const newListeners = listeners.filter((el) => el !== listener);
+
+    if (newListeners.length === 0) {
+      this.events.delete(eventName);
+    } else {
+      this.events.set(eventName, newListeners);
+    }
   }
 
   emit(eventName, ...args) {
@@ -47,7 +50,7 @@ class MyEventEmitter {
     }
 
     for (const listener of [...listeners]) {
-      listener(...args);
+      listener.apply(this, args);
     }
   }
 
@@ -60,7 +63,7 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
-    if (!eventName) {
+    if (eventName === undefined) {
       this.events.clear();
 
       return;
