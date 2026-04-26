@@ -47,8 +47,12 @@ class MyEventEmitter {
 
     this.prependListener(name, onceListener);
   }
-  removeAllListeners(name) {
-    delete this.listeners[name];
+  removeAllListeners(name = undefined) {
+    if (name === undefined) {
+      this.listeners = {};
+    } else {
+      delete this.listeners[name];
+    }
   }
   listenerCount(name) {
     return this.listeners[name] ? this.listeners[name].length : 0;
