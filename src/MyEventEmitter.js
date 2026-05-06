@@ -21,6 +21,10 @@ class MyEventEmitter {
     this.on(event, wrapper);
   }
   off(event, listener) {
+    if (!this.listeners[event]) {
+      return 0;
+    }
+
     if (this.listeners[event].includes(listener)) {
       this.listeners[event] = this.listeners[event].filter(
         (listen) => listen !== listener,
