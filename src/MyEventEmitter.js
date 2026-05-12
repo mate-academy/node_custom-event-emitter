@@ -1,10 +1,9 @@
 /* eslint-disable max-len */
-/* eslint-disable no-console */
 'use strict';
 
 class MyEventEmitter {
   constructor() {
-    this.events = {};
+    this.events = Object.create(null);
   }
 
   on(eventName, listener) {
@@ -66,16 +65,32 @@ class MyEventEmitter {
       return 0;
     }
 
-    this.events[eventName].unshift({ callback: listener, once: false });
+    if (!this.events[eventName]) {
+      this.events[eventName] = [{ callback: listener, once: false }];
+    } else {
+      this.events[eventName].unshift({ callback: listener, once: false });
+    }
   }
+
   prependOnceListener(eventName, listener) {
     if (!listener) {
       return 0;
     }
 
-    this.events[eventName].unshift({ callback: listener, once: true });
+    if (!this.events[eventName]) {
+      this.events[eventName] = [{ callback: listener, once: true }];
+    } else {
+      this.events[eventName].unshift({ callback: listener, once: true });
+    }
   }
+
   removeAllListeners(eventName) {
+    if (typeof eventName === 'undefined') {
+      this.events = {};
+
+      return;
+    }
+
     delete this.events[eventName];
   }
 
