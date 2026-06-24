@@ -83,6 +83,12 @@ class MyEventEmitter {
   }
 
   removeAllListeners(event) {
+    if (event === undefined) {
+      this.events = {};
+
+      return;
+    }
+
     if (Object.hasOwn(this.events, event)) {
       delete this.events[event];
     }
