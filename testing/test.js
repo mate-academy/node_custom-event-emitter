@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const MyEventEmitter = require('./MyEventEmitter');
+const MyEventEmitter = require('../src/MyEventEmitter');
 const emitter = new MyEventEmitter();
 
 // 1. on — додає слухача
