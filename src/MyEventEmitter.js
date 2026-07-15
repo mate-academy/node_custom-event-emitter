@@ -58,6 +58,10 @@ class MyEventEmitter {
         events[eventName] = events[eventName].filter(
           (handler) => !Array.isArray(handler),
         );
+
+        if (events[eventName].length === 0) {
+          delete events[eventName];
+        }
       }
     });
   }
@@ -71,8 +75,13 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
-    delete this.#prependEvents[eventName];
-    delete this.#events[eventName];
+    if (eventName) {
+      delete this.#prependEvents[eventName];
+      delete this.#events[eventName];
+    } else {
+      this.#prependEvents = {};
+      this.#events = {};
+    }
   }
 
   listenerCount(eventName) {
