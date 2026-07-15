@@ -4,7 +4,7 @@ class MyEventEmitter {
   #prependEvents = {};
   #events = {};
 
-  #addToCollection(events, eventName, eventHandler) {
+  #addToEvents(events, eventName, eventHandler) {
     if (!events[eventName]) {
       events[eventName] = [];
     }
@@ -12,12 +12,20 @@ class MyEventEmitter {
     events[eventName].push(eventHandler);
   }
 
+  #prependToEvents(events, eventName, eventHandler) {
+    if (!events[eventName]) {
+      events[eventName] = [];
+    }
+
+    events[eventName].unshift(eventHandler);
+  }
+
   on(eventName, eventHandler) {
-    this.#addToCollection(this.#events, eventName, eventHandler);
+    this.#addToEvents(this.#events, eventName, eventHandler);
   }
 
   once(eventName, eventHandler) {
-    this.#addToCollection(this.#events, eventName, [eventHandler]);
+    this.#addToEvents(this.#events, eventName, [eventHandler]);
   }
 
   off(eventName, eventHandler) {
@@ -36,14 +44,14 @@ class MyEventEmitter {
     });
   }
 
-  emit(eventName) {
+  emit(eventName, ...args) {
     [this.#prependEvents, this.#events].forEach((events) => {
       if (events[eventName]) {
         for (const handler of events[eventName]) {
           if (Array.isArray(handler)) {
-            handler[0]();
+            handler[0](...args);
           } else {
-            handler();
+            handler(...args);
           }
         }
 
@@ -55,16 +63,16 @@ class MyEventEmitter {
   }
 
   prependListener(eventName, eventHandler) {
-    this.#addToCollection(this.#prependEvents, eventName, eventHandler);
+    this.#prependToEvents(this.#prependEvents, eventName, eventHandler);
   }
 
   prependOnceListener(eventName, eventHandler) {
-    this.#addToCollection(this.#prependEvents, eventName, [eventHandler]);
+    this.#prependToEvents(this.#prependEvents, eventName, [eventHandler]);
   }
 
-  removeAllListeners() {
-    this.prependEvents = {};
-    this.events = {};
+  removeAllListeners(eventName) {
+    delete this.#prependEvents[eventName];
+    delete this.#events[eventName];
   }
 
   listenerCount(eventName) {

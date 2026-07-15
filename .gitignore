@@ -8,4 +8,4 @@ node_modules
 # MacOS
 .DS_Store
 
-src/test.js
+src/myTest.js
