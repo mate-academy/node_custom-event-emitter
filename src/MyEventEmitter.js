@@ -59,7 +59,11 @@ class MyEventEmitter {
   }
 
   removeAllListeners(event) {
-    this.listeners = this.listeners.filter((e) => e.event !== event);
+    if (!event) {
+      this.listeners = [];
+    } else {
+      this.listeners = this.listeners.filter((e) => e.event !== event);
+    }
   }
 
   listenerCount(event) {
