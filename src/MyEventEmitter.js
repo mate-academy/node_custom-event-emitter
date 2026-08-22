@@ -27,6 +27,10 @@ class MyEventEmitter {
   off(eventName, callback) {
     const subscribers = this.events.get(eventName);
 
+    if (!subscribers) {
+      return;
+    }
+
     const filteredSubs = subscribers.filter((sub) => sub !== callback);
 
     this.events.set(eventName, filteredSubs);
