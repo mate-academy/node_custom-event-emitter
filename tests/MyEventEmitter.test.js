@@ -68,8 +68,7 @@ describe('MyEventEmitter', () => {
 
   describe('"listenerCount" method', () => {
     test('should always return 0 for an event without listeners', () => {
-      expect(emitter.listenerCount(getRandomEventName()))
-        .toBe(0);
+      expect(emitter.listenerCount(getRandomEventName())).toBe(0);
     });
   });
 
