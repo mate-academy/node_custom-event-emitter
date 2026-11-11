@@ -36,11 +36,13 @@ class MyEventEmitter {
       let removedOnce = false;
 
       this.events[eventName] = this.events[eventName].filter((listener) => {
-        if (listener[1] === eventAction) {
+        if (listener[1] === eventAction && !removedOnce) {
           removedOnce = true;
+
+          return false;
         }
 
-        return listener[1] !== eventAction && !removedOnce;
+        return true;
       });
     }
 
