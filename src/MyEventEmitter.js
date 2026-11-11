@@ -51,13 +51,11 @@ class MyEventEmitter {
 
   emit(eventName, ...args) {
     if (Object.hasOwn(this.events, eventName)) {
-      const currentEvent = [...this.events[eventName]];
+      this.events[eventName].forEach((listener) => {
+        if (listener[0] === 'once') {
+          this.off(eventName, listener[1]);
+        }
 
-      this.events[eventName] = this.events[eventName].filter(
-        (listener) => listener[0] !== 'once',
-      );
-
-      currentEvent.forEach((listener) => {
         listener[1](...args);
       });
     }
