@@ -33,22 +33,32 @@ class MyEventEmitter {
 
   off(eventName, eventAction) {
     if (Object.hasOwn(this.events, eventName)) {
-      this.events[eventName] = this.events[eventName].filter(
-        (listener) => listener[1] !== eventAction,
-      );
+      let removedOnce = false;
+
+      this.events[eventName] = this.events[eventName].filter((listener) => {
+        if (listener[1] === eventAction) {
+          removedOnce = true;
+        }
+
+        return listener[1] !== eventAction && !removedOnce;
+      });
     }
 
     return this;
   }
 
   emit(eventName, ...args) {
-    this.events[eventName].forEach((listener) => {
-      listener[1](...args);
-    });
+    if (Object.hasOwn(this.events, eventName)) {
+      const events = this.events;
 
-    this.events[eventName] = this.events[eventName].filter(
-      (listener) => listener[0] !== 'once',
-    );
+      this.events[eventName] = this.events[eventName].filter(
+        (listener) => listener[0] !== 'once',
+      );
+
+      events[eventName].forEach((listener) => {
+        listener[1](...args);
+      });
+    }
   }
 
   prependListener(eventName, eventAction) {
@@ -80,7 +90,7 @@ class MyEventEmitter {
   }
 
   removeAllListeners(eventName) {
-    if (!eventName) {
+    if (eventName === undefined) {
       this.events = {};
     } else {
       this.events[eventName] = [];
